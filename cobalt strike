@@ -4,3 +4,12 @@ three parts to cobalt strike:
       client: used by the red team to connect to one or more team servers to manage and interact with beacon payloads
 
 listeners define the protocol and parameters by which a beacon payload communicates w/ a team server
+      provided by default: HTTP/S, DNS, TCP, SMB
+      split into two types:
+            egress: egress beacon communicates directly to a team server (DNS and HTTP/S)
+            peer-to-peer (P2P): has its traffic routed through another beacon (SMB and TCP) and ultimately will be linked to an egress beacon to reach the team server
+
+HTTP/S listeners:
+      the team server starts a built-in web server to serve the requests
+      GETs to fetch tasks from the team server
+      POSTs to send back the results
