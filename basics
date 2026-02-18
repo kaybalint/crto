@@ -13,3 +13,26 @@ standards to rationalize TI-related data in a common format:
   Microsoft Interflow 
   Structured Threat Information (STIX)
   Trusted Automated eXchange of Indicator Information (TAXII) 
+
+targeted attack lifecycle:
+  initial recon -> inital compromise -> foothold -> priv esc -> internal recon -> lateral movement -> persistence -> complete mission
+
+goal planning:
+  what ability does a threat have to gain physical and/or remote access?
+  what ability does a threat have to gain elevated (local and/or domain admin) access?
+  what ability does a threat have to move freely throughout a network?
+  what ability does a threat have to identify and access sensitive information?
+  what ability does a threat have to exfiltrate sensitive data?
+  how long can a threat go undetected and what must a threat do to initiate a reaction from the organisation?
+  what are the potential business impacts a threat could realise?
+
+do's:
+  log all actions
+  understand the tools
+  be aware, maintain situational awareness
+
+dont's:
+  use untested or pre-compiled tools
+  use unecrypted channels for C2
+  exfiltrate restricted data
+  disable security controls
