@@ -1,0 +1,15 @@
+emulation: specific threats, narrow in scope, leaverages known TTPs
+simulation: simulates hypothetical threats, broad scope, leverages unknown/unique TTPs
+
+primum non nocere: "first, do no harm"
+
+OPSEC: operations security 
+  likelihood of actions being observed and interrupted by a blue team
+
+threat intelligence: evidence based knowledge about exisiting or emerging threats 
+standards to rationalize TI-related data in a common format:
+  Common Attack Pattern Enumeration and Classification (CAPEC)
+  Cyber Observables (CybOX)
+  Microsoft Interflow 
+  Structured Threat Information (STIX)
+  Trusted Automated eXchange of Indicator Information (TAXII) 
