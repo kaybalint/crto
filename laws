@@ -1,4 +1,30 @@
-Computer Misuse Act
-Human Rights Act
-Data Protection Act & GDPR
-Sector Legislation
+NOTE: these are UK specific laws
+
+computer misuse act (CMA)
+  section 1 makes it an offense to gain unauthorized access to computer material (systems or data)
+  section 2 makes it an offense to gain unauthorized access with intent to commit or facilitate further offenses
+  section 3 makes it an offense to perform unauthorized acts against computer systems (even if accidental)
+  section 3A criminalizes the making, supplying, or obtaining of any programs/data which could hold malware or hacking instructions
+  sections 3ZA enforces harsher sentencing for unauthorized acts which cause significant risk or damage to human welfare/national security
+  
+human rights act
+  it is essential that activites of a security assessment do not infrige upon an individual's privacy rights
+
+data protection act & GDPR
+  lawfulness: processing of personal data but have a valid legal basis and be compliant w/ requirements
+  fairness: any data processing must be fair towards the individual, not misleading or deceptive
+  transparency: controllers must provide individuals with information regarding the processing of their data in a readable format
+  purpose limitation: data must be collected for a specific and legit purpose 
+  data minimization: only collect and process data that is relevant and limited to what is needed for intended purposes
+  accuracy: data must be accurate and kept up-to-date
+  storage limitation: controllers must not hold on to personal data for longer than is necessary
+  accountability: controllers are responsible for compliance with all above principles
+
+sector legislation:
+  financial services and markets act: regulates financial services sector 
+  payment services regulations: governs payments services and set security requirements
+  health & social care act: governs the delivery health and social care services and provisions the protection and confidentiality of patient data
+  digital operational resilience act (DORA): aims to strengthen IT security of financial entities
+
+  CBEST: framework that aligns various regulatory requirements, specifically for financial institutions
+  TIBER-EU: framework for conducting threat intelligence led ethical red teaming 
