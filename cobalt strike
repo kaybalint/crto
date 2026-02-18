@@ -3,3 +3,4 @@ three parts to cobalt strike:
       team server: central control and logging system which stores information collected during an engagement
       client: used by the red team to connect to one or more team servers to manage and interact with beacon payloads
 
+listeners define the protocol and parameters by which a beacon payload communicates w/ a team server
