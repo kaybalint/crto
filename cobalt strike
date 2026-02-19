@@ -13,3 +13,16 @@ HTTP/S listeners:
       the team server starts a built-in web server to serve the requests
       GETs to fetch tasks from the team server
       POSTs to send back the results
+
+HTTP/S hosts:
+      IP or domain name that the beacon will send its HTTP/S requests to
+      this IP or domain may resolve directly to a team server or a redirector (iptables, socat, nginx, etc.)
+      host rotation strategies:
+            round robin: loops through host list top-to-bottom
+            random: randomly selected host
+            failover: failover-x or failover-m/h/d
+            rotate: rotate-m/h/d where each host is used for the given time period and then rotated to next in list
+      max retry strategies:
+            none: will run indefinitely 
+            exit: exit-[max_attempts]-[increase_attempts]-[duration]
+                  e.g. exit-50-25-1h tells the beacon to increase sleep time to 1h after 25 failed attempts and exit at 50 failed attempts
