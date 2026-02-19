@@ -4,7 +4,7 @@ three parts to cobalt strike:
       client: used by the red team to connect to one or more team servers to manage and interact with beacon payloads
 
 listeners define the protocol and parameters by which a beacon payload communicates w/ a team server
-      provided by default: HTTP/S, DNS, TCP, SMB
+      provided by default: HTTP/S, DNS, SMB, TCP
       split into two types:
             egress: egress beacon communicates directly to a team server (DNS and HTTP/S)
             peer-to-peer (P2P): has its traffic routed through another beacon (SMB and TCP) and ultimately will be linked to an egress beacon to reach the team server
@@ -26,3 +26,22 @@ HTTP/S hosts:
             none: will run indefinitely 
             exit: exit-[max_attempts]-[increase_attempts]-[duration]
                   e.g. exit-50-25-1h tells the beacon to increase sleep time to 1h after 25 failed attempts and exit at 50 failed attempts
+      guardrails:
+            prevent stageless beacon payloads from running unless specific criteria is met (such as hostname, username, IP, etc.)
+
+DNS listener:
+      the team server starts a built-in web DNS server to serve the requests
+      communicates via DNS requests, such as A, AAAA, TXT record lookups
+      NOTE: must add the nedded DNS records to make the team server authoritative for one or more subdomains
+      the beacon checks in with the server with an A record lookup
+      the 'checkin' command transmits the beacon's metadata
+
+SMB listener:
+      this listener does not bind or listen on the team server
+      the SMB beacon payload will create an SMB pipe using the pipename specified
+      another beacon will then be used to connect to the named pipe and relay traffic
+
+TCP listener:
+      this listener does not bind or listen on the team server
+      the TCP beacon payload will bind and listen on the port specified
+      another beacon will then be used to connect to the port and relay traffic
