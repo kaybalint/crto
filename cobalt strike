@@ -45,3 +45,45 @@ TCP listener:
       this listener does not bind or listen on the team server
       the TCP beacon payload will bind and listen on the port specified
       another beacon will then be used to connect to the port and relay traffic
+
+beacon payloads...
+      most C2 agents are written as a DLL and paired with a loader to load from memory
+      stomped loader:
+            implemeted with a reflective loader function, which when called, walks back over its own image, maps a new copy of itself into memory, and calls its entry point. it lives in the .text section
+            because the DLL is exported as shellcode, a small shellcode stub must be written over the PE's DOS header which is responsible for jumping code execution to the ReflectiveLoader
+      prepended loader:
+            the loader is prepended to the front of a PE
+      staged payloads: 
+            allow for separation of exploit (code that triggers the vulnerability) and payload (code we want ran as a result)
+            a small program (the stager) will execute and reach out over a different channel to retrieve the full payload (the stage) 
+            NOTE: stagers are typically ~900 bytes whereas a stage is ~308000 bytes
+            the stager may be susceptible to hijacking due to its small size, it does not verify who it is communicating with
+            also due to the small size, several good coding practices are omitted 
+
+generating payloads via cobalt strike...
+      HTML application (.hta):
+            methods of execution: exeutable, powershell, VBA
+            always delivers an x86 payload
+      office macro:
+            method of execution: VBA macri
+            always delivers an x86 payload
+      stager/stageless:
+            provide source code files for a variety of languages, similar to msfvenom 
+      windows stager/stageless:
+            methods of execution: exe, windows service exe, windows DLL
+
+interacting with beacons via cobalt strike...
+      when a beacon first checks in to a team server, a record will appear in the event log and a new session will appear in the table
+      table columns:
+            external: external IP of the target
+            internal: internal IP of the target
+            listener: name of egress listener the beacon is communicating through
+            last: the last the beacon communicated with the team server
+            sleep: the sleep time of the beacon
+      a blue monitor icon depicts standard user privilges, where red depicts local admin or SYSTEM
+      to interact with a session, double-click or right-click and select 'interact'
+      the graph view better depicts the relationship b/w several beacons:
+            dashed green line: HTTP/S
+            dashed yellow line: DNS
+            solid yellow line: SMB
+            solid green line: TCP
