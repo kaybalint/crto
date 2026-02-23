@@ -70,3 +70,10 @@ beacon command overview & behavior:
     inline commands can be altered with the process-inject block
     fork & run commands can be altered with process-inject and post-ex (since they must inject shellcode, start new thread, and new named pipe)
     
+blending post-ex:
+  it is good practice to have your egress beacon running inside a process that makes sense for the C2 channel being used
+    e.g. an HTTP/S beacon should run inside Microsoft Edge 
+  however, any new processes will also be run under that parent of Edge and we may not want that
+    e.g. cmd.exe running under Edge may be a red flag for some AV
+  to resolve this, we should use ppid to spawn the process under a different parent that makes more contextual sense
+    e.g. spoof cmd.exe to run under explorer.exe
