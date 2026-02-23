@@ -27,4 +27,9 @@ resource kit:
   NOTE: if we host a payload using the scripted web delivery, it may be detected due to compress.ps1
         if this happens, we can use https://github.com/danielbohannon/Invoke-Obfuscation and replace the content of compress.ps1
 
-malleable C2:
+beacon memory:
+  all these artifacts do the same thing: inject beacon shellcode and then the beacon runs in memory
+  some AV can detect these beacons via memory scanning capabilities
+  RWX memory:
+    most applications do not use RWX memory so it can be a red flag for AV
+    ensure 
