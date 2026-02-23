@@ -66,3 +66,7 @@ example of stage within Malleable C2...
 
 beacon command overview & behavior:
   https://www.zeropointsecurity.co.uk/path-player?courseid=red-team-ops&unit=696a1d7abd92eef9e30f7537Unit
+  can alter specific elements of these commands via Malleable C2 profile:
+    inline commands can be altered with the process-inject block
+    fork & run commands can be altered with process-inject and post-ex (since they must inject shellcode, start new thread, and new named pipe)
+    
