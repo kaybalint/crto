@@ -1,3 +1,30 @@
 artifact kit:
+  cobalt strike (CS) client is packaged with default executable templates (exe, svc.exe, dll)
+    noted 32 or 64 to specify arch
+    'big' appended to note stagless payloads
+    svc are the service binary templates
+  CS then uses these template to generate the user defined shellcode
+  because these templates are the same across all CS deployments, they are often targeted by AV
+  we can alter these templates via the artifact kit to bypass AV
+  we can build new templates using ./build.sh included in the artifact kit
+    ex.  ./build.sh <techniques> <allocator> <stage size> <rdll size> <include rsc file> <stack spoof> <syscalls> <output dir>
+    e.g. ./build.sh mailslot VirtualAlloc 344564 0 false false none /mnt/c/Tools/cobaltstrike/custom-artifacts
+  NOTE: use https://github.com/rasta-mouse/ThreatCheck to analyze if binary comes back as malicious
+        if any section comes back as malicious, check ghidra to find the exact line of code and modify it
+  once we have our new templates, load them via CS > Script Manager > Load
+
 resource kit:
+  CS also has templates for script-based payloads, such as PowerShell
+    NOTE: generating the new resource templates only requires an output dir
+    e.g. mnt/c/Tools/cobaltstrike/arsenal-kit/kits/resource$ ./build.sh /mnt/c/Tools/cobaltstrike/custom-resources
+  Windows AntiMalware Scan Interface (AMSI) is a concern here as it detects malware running in memory
+    NOTE: AMSI submits data to an AV for analysis and the AV determines if the data is malicious
+  native Windows components that are AMSI aware include UAC, PowerShell, Windows Script Host, JavaScript, VBScript, VBA macros
+  the best approach is to find the malicious parts and change them, as attempts to fool AMSI will likely be detected
+  use the same ThreatCheck tool to find the malicious parts and then alter using least-complex to most-complex
+    e.g. if ThreatCheck flags "('System.dll')" then change it to "('Syst'+'em.dll')"
+    e.g. if Marshal.Copy is flagged switch to WriteProcessMemory API call
+  NOTE: if we host a payload using the scripted web delivery, it may be detected due to compress.ps1
+        if this happens, we can use https://github.com/danielbohannon/Invoke-Obfuscation and replace the content of compress.ps1
+
 malleable C2:
