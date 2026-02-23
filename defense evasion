@@ -78,3 +78,7 @@ blending post-ex:
   to resolve this, we should use ppid to spawn the process under a different parent that makes more contextual sense
     e.g. spoof cmd.exe to run under explorer.exe
   NOTE: instead of using ppid, we can leverage spawnto to set the process that is used to run the post-ex capability
+
+troubleshooting if we get access denied errors:
+  it is typically an issue with specific API call or an AV blocking it, so try several methods
+  https://www.zeropointsecurity.co.uk/path-player?courseid=red-team-ops&unit=6996f680b85b43e4db02b8e0Unit
