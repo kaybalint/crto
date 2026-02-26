@@ -1,1 +1,7 @@
 DELIVERY(CONTAINER(TRIGGER + PAYLOAD + DECOY))
+
+delivery: the technique used to deliver the package to the victim
+container: the container format used to package the files
+trigger: the means to trigger payload execution
+payload: the malicious code to execute
+decoy: a file to display to the victim
