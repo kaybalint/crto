@@ -50,3 +50,10 @@ payload techniques:
   
   code signing:
     files that have been signed by a trusted authority often produce fewer to none security alerts
+    extended validation (EV) makes the publisher trusted by SmartScreen as opposed to a standard cert which just confirms its integrity
+    we want an EV cert, but can only get these if we are an organization
+    how to get an EV cert:
+      use leaked and/or stolen certificates (GitHub has a path qualifier that can be used to find certificates that have been committed to public repositories)
+      search public S3 buckets, game hacking forums, and other places
+
+droppers:
