@@ -57,3 +57,11 @@ payload techniques:
       search public S3 buckets, game hacking forums, and other places
 
 droppers:
+  programs the deliver another program
+  used to evade AV and complicate the attack chain analysis
+  steps to create JS dropper:
+    1. create new Class Library (.NET Framework) project
+    2. rename Class.cs to dropper.cs
+    3. right-click the project and go to Add > Existing Item
+    4. select payload file (e.g. http_x64.exe) and change build action property to embedded resource
+    
