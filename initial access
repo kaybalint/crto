@@ -10,4 +10,43 @@ payload techniques:
   DLL hijacking: forces legit application to use malicious DLL
     abuses the DLL search order (current dir, system dir, etc.)
     can find opportunities by searching procmon for path ends in DLL and result is NAME NOT FOUND
-    
+    NOTE: windows component store is located in C:\Windows\WinSxS (side by side assembly) and older, vulnerable versions of software may be stored here
+  
+  e.g. target: ngentask.exe 
+       run the program in proc mon and try to find any not found DLLs and if we can write where it's looking
+       if we cannot write where the progam is looking, try finding an older version
+        ex. PS C:\Users\Attacker> ls -Path C:\Windows\WinSxS -Recurse -Filter ngentask.exe | Select -expand FullName
+       if we find an older version, run some and see if it looks for DLLs using the standard search order
+       if it searches our current working directory, we can upload a DLL of the same name with our payload
+  
+  force loading DLLs:
+    using startup hooks for apps written in .NET we can abuse AppDomainManager to force load our DLL
+    our DLL must be in the same directory as the .NET exe (so just copy the exe to the working dir)
+    we must set two environmental variables set before we run the .NET exe:
+      PS C:\Users\Attacker>$env:APPDOMAIN_MANAGER_ASM = 'AppDomainHijack, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'
+      PS C:\Users\Attacker>$env:APPDOMAIN_MANAGER_TYPE = 'AppDomainHijack.DomainManager'
+    OR we can define the appDomainManagerAssembly and appDomainManagerType in a config file (e.g. ngentask.exe.config)
+  
+  windows installer:
+    MSI files store the files to be installed as well as installation steps
+    steps to create an MSI file:
+      1. create new setup project
+      2. add our payload dependencies to the application folder (e.g. C:\Payloads\http_x64.exe)
+      3. modify the properties to include its new file name and whether or not its hidden
+      4. to ensure it runs during the installation, right-click the project then select view > custom actions
+      5. right-click the install step and select add custom action, then add our payload file
+        NOTE: if payload is 64 bit then be sure to set the Run64Bit property to True
+      6. modify the project properties to have author, manufacturer, title, etc. for legitimacy
+      7. now build > build solution and we will get an exe and an msi, but we only need to deliver the msi
+  
+  excel add-ins:
+    excel macros (.xlam files) located in %APPDATA%\Microsoft\Excel\XLSTART\ will automatically load
+    steps to create xlam file:
+      1. create new workbook and open VB editor (Alt + F11)
+      2. right-click VBAProject then select Insert > Module
+      3. add in macro (payload) code
+      4. then save as a .xlam file in your payload dir
+      5. to test, copy into the XLSTART dir and reopen the file
+  
+  code signing:
+    files that have been signed by a trusted authority often produce fewer to none security alerts
