@@ -4,4 +4,10 @@ delivery: the technique used to deliver the package to the victim
 container: the container format used to package the files
 trigger: the means to trigger payload execution
 payload: the malicious code to execute
-decoy: a file to display to the victim
+decoy: a file to display to the victim, should follow the pretext (same file type as trigger)
+
+payload techniques:
+  DLL hijacking: forces legit application to use malicious DLL
+    abuses the DLL search order (current dir, system dir, etc.)
+    can find opportunities by searching procmon for path ends in DLL and result is NAME NOT FOUND
+    
