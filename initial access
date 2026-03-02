@@ -73,3 +73,22 @@ droppers:
 
 triggers:
   the trigger is the file the user will interact with, should ideally just be double-click
+  batch files (.bat, .cmd, or .btm):
+    to ensure the commands are visible. we must start the file with '@echo off'
+    to ensure command output aren't visible, we must add '> nul 2>&1' to end of the command
+    we can change a bat file's behavior dependent on if it was run from command line or double-clicked:
+      the variable %cmdcmdline% contains the original command line that was invoked
+        e.g. double-clicking will have C:\Windows\system32\cmd.exe /c ""C:\Users\Daniel\Desktop\test.bat""
+             run via command prompt will have C:\Windows\System32\cmd.exe
+      the variable %~f0 contains the full path of the BAT file
+        e.g. double-clicking will have C:\Users\Daniel\Desktop\test.bat
+      so say we only want to run the script if it's been double-clicked, we check if the bat file path is present in cmdcmdline:
+        @echo off
+        echo %cmdcmdline% | find /i "%~f0" || exit
+        calc
+        exit
+  shell link (.lnk):
+    binary file format used to create windows shortcuts
+    these are special bc the .lnk wont show in explorer, so we can name a file report.pdf.lnk and it will show as report.pdf
+
+    
