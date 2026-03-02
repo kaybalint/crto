@@ -61,7 +61,12 @@ droppers:
   used to evade AV and complicate the attack chain analysis
   steps to create JS dropper:
     1. create new Class Library (.NET Framework) project
-    2. rename Class.cs to dropper.cs
+    2. rename Class.cs to Dropper.cs
     3. right-click the project and go to Add > Existing Item
     4. select payload file (e.g. http_x64.exe) and change build action property to embedded resource
-    
+       example code in MyDropper.dll
+    5. build the project, output will be MyDropper.dll
+    6. serialize using GadgetToJScript
+        where -w is the type of script to output, -b bypasses type check, -o is the output path
+        ex. PS C:\Users\Attacker> C:\Tools\GadgetToJScript\GadgetToJScript\bin\Release\GadgetToJScript.exe -a C:\Users\Attacker\source\repos\MyDropper\bin\Release\MyDropper.dll -w js -b -o C:\Payloads\dropper
+        this produces a JScript dropper that can be executed with wscript or double-clicking
