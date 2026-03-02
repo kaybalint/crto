@@ -120,4 +120,21 @@ delivery:
   the method by which we get the victim to download the initial access package
   HTML smuggling:
     means of leveraging HTML and JavaScript to sneak files past content filters by encoding the content within the HTML and using JavaScript to decode/download
-    
+    example code in HTML Smuggling
+  SVG smuggling:
+    similar to HTML but leveraging SVG format
+    example code in SVG Smuggling
+  cobalt strike site clone:
+    can clone a legitimate website and then embed a URL that the target's browser will automatically download without needing a user to click anything on the page
+    steps:
+      1. host file (site management > host file)
+          file: initial access package (payload)
+          local uri: where it will be hosted on cobalt strike's web server
+          local host: sets the url for the hosted file
+          local port: sets the port
+          mime type: automation
+      2. clone site (management > clone site)
+          clone url: page we want to clone
+          local uri: uri the team server will host it on
+          attack: resource we want to embed in the cloned page
+          
