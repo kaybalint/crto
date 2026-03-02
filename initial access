@@ -108,4 +108,16 @@ triggers:
       tool: https://github.com/ZERODETECTION/MSC_Dropper
 
 containers:
-  mark of the web (MotW)
+  mark of the web (MotW) marks files that were downloaded from the internet as potentially unsafe
+  this may pose issues when phishing as additional security warnings may be shown to the user
+  containers bundle all dependencies into a single file (iso/img, zip, wim, 7z, etc.)
+  tool: https://github.com/mgeeky/PackMyPayload (-H sets the hidden attribute)
+    e.g. python3 PackMyPayload.py test.pdf test.iso
+         python3 PackMyPayload.py -H decoy.xlsx,payload.xlam /mnt/c/Payloads/xlam /mnt/c/Payloads/xlam/package.img
+  this should remove MotW!
+
+delivery:
+  the method by which we get the victim to download the initial access package
+  HTML smuggling:
+    means of leveraging HTML and JavaScript to sneak files past content filters by encoding the content within the HTML and using JavaScript to decode/download
+    
