@@ -70,3 +70,6 @@ droppers:
         where -w is the type of script to output, -b bypasses type check, -o is the output path
         ex. PS C:\Users\Attacker> C:\Tools\GadgetToJScript\GadgetToJScript\bin\Release\GadgetToJScript.exe -a C:\Users\Attacker\source\repos\MyDropper\bin\Release\MyDropper.dll -w js -b -o C:\Payloads\dropper
         this produces a JScript dropper that can be executed with wscript or double-clicking
+
+triggers:
+  the trigger is the file the user will interact with, should ideally just be double-click
