@@ -106,3 +106,6 @@ triggers:
     uses a .msc file and an XXS flaw to trigger JavaScript via microsoft management console
       ex. https://gist.github.com/joe-desimone/2b0bbee382c9bdfcac53f2349a379fa4 (line 105)
       tool: https://github.com/ZERODETECTION/MSC_Dropper
+
+containers:
+  mark of the web (MotW)
