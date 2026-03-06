@@ -21,7 +21,8 @@ basic privileges info:
       weak service file permissions
       weak service registry permissions
       generic software vulnerabilities
-  NOTE: we can list these services in cobalt strike using 'sc_enum'
+  NOTE: we can list these services in cobalt strike using 'sc_enum', stop a service using 
+  sc_stop' and start using 'sc_start'
 
 path interception:
   class of vulnerability where an adversary drops an exe in a location where it will execute before the intended one
@@ -34,4 +35,29 @@ path interception:
      while enumerating services, if we see any with an unquoted path we can check if any directories are writable
      if so, we can upload an exe with the necessary name to get executed
      NOTE: we will have to start and stop the service to have it trigger
+
+weak service permissions:
+  service file permissions: 
+    we may be able to overwrite a service entirely
+    NOTE: we will have to stop the service, then upload our payload, then start again
+  service registry permissions:
+    we may be able to modify a service's registry config to point to a different binary
+      e.g. sc_config BadWindowsService C:\Path\to\Payload.exe 0 2
+
+dll search order hijacking:
+  this occurs when we are able to write a malicious DLL into a directory that is higher in the search order than the intended DLL
+
+software vulnerabilities:
   
+
+*******NOTES*********
+FIND DIR PERMISSIONS:
+cacls "C:\path\to\dir"
+
+COMMON SEARCH ORDER:
+The executing directory.
+The System32 directory.
+The 16-bit System directory.
+The Windows directory.
+The current working directory of the program.
+Directories in the PATH environment variable.
