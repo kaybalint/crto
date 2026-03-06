@@ -21,4 +21,17 @@ basic privileges info:
       weak service file permissions
       weak service registry permissions
       generic software vulnerabilities
+  NOTE: we can list these services in cobalt strike using 'sc_enum'
 
+path interception:
+  class of vulnerability where an adversary drops an exe in a location where it will execute before the intended one
+  PATH env variable:
+    if we modify this variable to include a directory writable by our user we can drop our malicious exe
+    NOTE: we can inspect this variable by running 'env'
+  search order hijacking:
+    if we have write permissions to the directory from the binary is running we may be able to overwrite other exes (e.g. cmd.exe)
+  unquoted paths:
+     while enumerating services, if we see any with an unquoted path we can check if any directories are writable
+     if so, we can upload an exe with the necessary name to get executed
+     NOTE: we will have to start and stop the service to have it trigger
+  
