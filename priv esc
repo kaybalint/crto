@@ -48,7 +48,8 @@ dll search order hijacking:
   this occurs when we are able to write a malicious DLL into a directory that is higher in the search order than the intended DLL
 
 software vulnerabilities:
-  
+  traditional vulnerabilities such as sqli, directory traversal, buffer overflows, etc.
+  if a service or application loads in a binary from a writable location we can overwrite it!
 
 *******NOTES*********
 FIND DIR PERMISSIONS:
