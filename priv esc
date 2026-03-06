@@ -51,6 +51,16 @@ software vulnerabilities:
   traditional vulnerabilities such as sqli, directory traversal, buffer overflows, etc.
   if a service or application loads in a binary from a writable location we can overwrite it!
 
+user account control:
+  controls access to securable objects by assigning integrity levels, one cannot modify an object that is assigned a higher integrity level than its own
+  to execute code in a high-integrity context we can use elevators or exploits
+  elevators:
+    runs any arbitrary command via 'runasadmin' 
+    e.g. runasadmin <exploit> <command> <args>
+  exploits:
+    spawns a new beacon session via 'elevate' 
+    e.g. elevate <exploit> <listener>
+
 *******NOTES*********
 FIND DIR PERMISSIONS:
 cacls "C:\path\to\dir"
