@@ -1,1 +1,24 @@
 tactic to exploit a vulnerability or misconfiguration to gain additional priviliges
+
+basic privileges info:
+  windows account groups relevant to priv esc:
+    users: low-priv accounts, no access to anything outside of their own files
+    administrators: used for system admin, control permissions over most objects
+    service user accounts: built into windows and used by the service control manager (SCM) to run services that windows relies on
+      LocalService: has minimum privileges, authenticates with anonymous creds
+      NetworkService: has minimum privilges, authenticates with computer's creds
+      LocalSystem: full control over most objects, highest level of access
+  
+  user rights assignment:
+    logon rights: control how and where an account is allowed to log on to a computer
+    user rights: control access to objects
+
+  vulnerable services:
+    services are a large attack surface bc they frequently run as SYSTEM
+    we can then abuse this via:
+      DLL search order hijacking
+      path interception
+      weak service file permissions
+      weak service registry permissions
+      generic software vulnerabilities
+
