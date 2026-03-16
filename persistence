@@ -117,4 +117,5 @@ elevated persistence:
         allows for querying of WMI objects using SQL-like language (WQL)
         example query to trigger an alert within 5 seconds of notepad.exe being launched:
             SELECT * FROM __InstanceCreationEvent WITHIN 5 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.Name = 'notepad.exe'
-        example persistence script in WMI event subscription
+        example persistence script in WMIEventSubscription
+
