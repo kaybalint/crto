@@ -1,4 +1,3 @@
-C:\Tools\WmiPersistence.ps1
 // this will trigger when the computer updates its Group Policy Objects.
 function Add-WmiPersistence
 {
