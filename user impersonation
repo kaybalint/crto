@@ -7,3 +7,16 @@ login basics:
                   holds info such as token id, token type, ID of logon session, SIDs, integrity, privs, etc.
     credential cache: LSASS stores creds in memory for users with active logon sessions
             windows uses the access token to look up associated logon session and associated credential cache
+
+token impersonation:
+    technique where an adversary impersonates another user's access token
+    if we have a user's plaintext creds, we can make a token:
+        beacon> make_token <domain>\<user> <password>
+    if we know of a process that is running as a different user, we can steal a token:
+        beacon> steal_token <pid>
+    if we wish to stop impersonating a token, we run 'rev2self'
+    if we want to store a token for future use:
+        beacon> token-store steal <pid>
+        beacon> token-store show
+        beacon> token-store use <id>
+        beacon> token-store remove <id>
