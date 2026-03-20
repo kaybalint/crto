@@ -1,0 +1,9 @@
+tactic for leveraging discovered credentials to assume the identity of the user
+
+login basics:
+    logon sessions: created after a user authenticated to a system, used to create an associated access token
+                    holds info such as logon id, logon time, logon server, username, SID, and UPN
+    access token: this token is what windows checks for access-based decisions, what whoami pulls info from
+                  holds info such as token id, token type, ID of logon session, SIDs, integrity, privs, etc.
+    credential cache: LSASS stores creds in memory for users with active logon sessions
+            windows uses the access token to look up associated logon session and associated credential cache
