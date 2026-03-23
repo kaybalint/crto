@@ -3,3 +3,10 @@ basic queries against AD for users, groups, OUs, GPOs, etc. can help with latera
 
 domain enumeration tools leverage LDAP or LDAPS, or newly ADWS (Active Directory Web Services) which wrpas LDAP queries in HTTP requests
 
+bloodhound is great for graphing and visualizing, running bloodhood we are likely to get caught
+  so best approach is to collect the data, convert to bloodhound format, and use bloodhound to graph
+      collection: ldapsearch, pyldapsearch
+      convert: BOFHound (https://github.com/coffeegist/bofhound)
+
+LDAP (Lightweight Directory Access Protocol)
+  389 (LDAP) or 636 (LDAPS)
