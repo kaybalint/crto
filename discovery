@@ -1,0 +1,5 @@
+tactic where an adversary enumerates information about the environment (such as users, systems, resources, etc.)
+basic queries against AD for users, groups, OUs, GPOs, etc. can help with lateral movement 
+
+domain enumeration tools leverage LDAP or LDAPS, or newly ADWS (Active Directory Web Services) which wrpas LDAP queries in HTTP requests
+
