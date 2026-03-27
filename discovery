@@ -10,3 +10,11 @@ bloodhound is great for graphing and visualizing, running bloodhood we are likel
 
 LDAP (Lightweight Directory Access Protocol)
   389 (LDAP) or 636 (LDAPS)
+  to search for objects using LDAP, we must provide a filter 
+    e.g. to search for all USER accounts, ldapsearch (samAccountType=805306368)
+  to further filter a search, we can add & or | operators
+    e.g. to search for all USER accounts, with admin count of 1, and excluded krbtgt account, ldapsearch (&(samAccountType=805306368)(adminCount=1)(!(name=krbtgt)))
+  to only return specific attributes, we can use the --attributes parameter
+    e.g. if we only want name and group memberships, --attributes name,memberof
+  NOTE: we can get the security descriptor of an object by appending ntsecuritydescriptor to our attributes parameter
+        e.g. to return every attribute and the security descriptor, use *,ntsecuritydescriptor
