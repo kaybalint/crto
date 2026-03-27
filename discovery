@@ -42,3 +42,13 @@ BOFHound
   NOTE: if we get an object with only an SID, or 'no name or id' that means we have no collected data for it
         we can fix this by going back to the beacon and targeting the specific object
           e.g. (objectsid=[SID]) --attributes *,ntsecuritydescriptor
+  LDAP alone will not be able to obtain restricted group data, but we can obtain this by navigating directly to the policy files
+    https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-ada1/6eb770b7-0c89-4a3e-a41e-2807d46880d8
+    be sure to check GptTmpl.inf inside the Machine's SecEdit folder, e.g. \\contoso.com\SysVol\contoso.com\Policies\{7A04B429-D293-45E8-A7BA-D630415B3D6A}\Machine\Microsoft\Windows NT\SecEdit\GptTmpl.inf
+    we can then manually add this data to bloodhound
+  WMI Filters:
+    GPOs may have a WMI filter applied to exclude specific computerss
+    we can find if a filter is applied using LDAP:
+      beacon> ldapsearch (objectClass=groupPolicyContainer) --attributes displayname,gPCWQLFilter
+    then to find information on the filter:
+      beacon> ldapsearch (objectClass=msWMI-Som) --attributes name,msWMI-Name,msWMI-Parm2 --dn "CN=SOM,CN=WMIPolicy,CN=System,DC=contoso,DC=com"
