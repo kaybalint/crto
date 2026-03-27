@@ -25,3 +25,20 @@ LDAP (Lightweight Directory Access Protocol)
     be cautious with extremely large pulls, such as (objectClass=*)
     be cautious with search time, limit attributes to bare essentials (e.g. samaccounttype,distinguishedname,objectsid,ntsecuritydescriptor)
     be cautious with ineffecient searches (less than 10% of searched objects returned) 
+
+BOFHound
+  python script that can parse the raw output of the ldapsearch BOF
+  example of queries to run within cobalt to build a picture of the environment:
+    beacon> ldapsearch (|(objectClass=domain)(objectClass=organizationalUnit)(objectClass=groupPolicyContainer)) --attributes *,ntsecuritydescriptor
+    beacon> ldapsearch (|(samAccountType=805306368)(samAccountType=805306369)(samAccountType=268435456)) --attributes *,ntsecuritydescriptor
+  then we need to copy our logs to our local machine:
+    $ scp -r attacker@10.0.0.5:/opt/cobaltstrike/logs .
+  then run BOFHound against the copied log directory:
+    $ bofhound -i logs/
+  then we can log in to bloodhound UI and inject the resulting JSON files
+    Administration > File Ingest
+  query within bloodhound to find kerberoastable users:
+    MATCH (n:User) WHERE n.hasspn=true RETURN n
+  NOTE: if we get an object with only an SID, or 'no name or id' that means we have no collected data for it
+        we can fix this by going back to the beacon and targeting the specific object
+          e.g. (objectsid=[SID]) --attributes *,ntsecuritydescriptor
