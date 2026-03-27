@@ -52,3 +52,5 @@ BOFHound
       beacon> ldapsearch (objectClass=groupPolicyContainer) --attributes displayname,gPCWQLFilter
     then to find information on the filter:
       beacon> ldapsearch (objectClass=msWMI-Som) --attributes name,msWMI-Name,msWMI-Parm2 --dn "CN=SOM,CN=WMIPolicy,CN=System,DC=contoso,DC=com"
+
+discovery example in the labs!
