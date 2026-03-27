@@ -18,3 +18,10 @@ LDAP (Lightweight Directory Access Protocol)
     e.g. if we only want name and group memberships, --attributes name,memberof
   NOTE: we can get the security descriptor of an object by appending ntsecuritydescriptor to our attributes parameter
         e.g. to return every attribute and the security descriptor, use *,ntsecuritydescriptor
+  good to know LDAP queries:
+    enumerating important details of every user, ldapsearch (samAccountType=805306368) --attributes samaccounttype,distinguishedname,objectsid,serviceprincipalname,useraccountcontrol,ntsecuritydescriptor
+    query to find kerberoastable users: ldapsearch (&(samAccountType=805306368)(servicePrincipalName=*)(!samAccountName=krbtgt)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))
+  OPSEC considerations with LDAP queries:
+    be cautious with extremely large pulls, such as (objectClass=*)
+    be cautious with search time, limit attributes to bare essentials (e.g. samaccounttype,distinguishedname,objectsid,ntsecuritydescriptor)
+    be cautious with ineffecient searches (less than 10% of searched objects returned) 
