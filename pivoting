@@ -8,5 +8,10 @@ SOCKS (socket secure) proxy:
     enter the IP of the team server and the port (e.g. 1080)
     select the corresponding "SOCKS" protocol
     we can then add a proxification rule to specify the IP (range) of our target host
+  to authenticate on windows (on attacker windows desktop):
+    authenticate using kerberos tickets (NOTE: add the hostname first, PS C:\Users\Attacker> Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value '10.10.120.1 lon-dc-1')
+    then create a credential object:
+      PS C:\Users\Attacker> $Cred = Get-Credential CONTOSO.COM\rsteel
+      PS C:\Users\Attacker> Get-ADUser -Filter 'ServicePrincipalName -like "*"' -Credential $Cred -Server lon-dc-1
 
 reverse port forwarding
