@@ -1,5 +1,12 @@
 tactic used to proxy traffic in or out of a network, using the beacon as the pivot point
 
-SOCKS proxy
+SOCKS (socket secure) proxy:
+  to start the proxy via beacon:
+    beacon> socks 1080
+  to connect on Windows using proxifier:
+    create a new proxy server profile, Profile > Proxy Servers
+    enter the IP of the team server and the port (e.g. 1080)
+    select the corresponding "SOCKS" protocol
+    
 
 reverse port forwarding
