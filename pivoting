@@ -7,6 +7,6 @@ SOCKS (socket secure) proxy:
     create a new proxy server profile, Profile > Proxy Servers
     enter the IP of the team server and the port (e.g. 1080)
     select the corresponding "SOCKS" protocol
-    
+    we can then add a proxification rule to specify the IP (range) of our target host
 
 reverse port forwarding
