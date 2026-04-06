@@ -1,0 +1,11 @@
+BASICS:
+    works on a system of tickets where principals (users and computers) are authenticated by a central, trusted server
+    relies on shared-secret cryptography to establish trust with clients
+    key distribution center (KDC):
+        trusted source for authentication
+        consists of a database of all principals and their associated password hashes, an authentication server, a ticket granting server
+        in a windows domain, the KDC would be the domain controller
+    ticket granting ticket (TGT):
+    service:
+    service ticket:
+    privileged attribute certificate:
