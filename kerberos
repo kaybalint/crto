@@ -3,9 +3,38 @@ BASICS:
     relies on shared-secret cryptography to establish trust with clients
     key distribution center (KDC):
         trusted source for authentication
-        consists of a database of all principals and their associated password hashes, an authentication server, a ticket granting server
+        consists of a database of all principals and their associated password hashes, 
+            an authentication server (AS), a ticket granting server (TGS)
         in a windows domain, the KDC would be the domain controller
     ticket granting ticket (TGT):
+        provided to a principal after their identity has been verified 
+        used in lieu of providing their password everytime they want to access a service
     service:
+        a resource that can be accessed by a principal (e.g. SMB share, MSSQL, etc.)
+        each service is identified by a SPN (i.e. class/instance:port)
     service ticket:
+        to access a service using kerberos, the principal must request a service ticket from the TGS
+        they send their TGT to the KDC and get a ticket granting service ticket in return
     privileged attribute certificate:
+        structure that can be attached to a ticket which contains additional principal information
+        the service will inspect the PAC to determine the user's privilege without querying from AD
+
+    authentication overview:
+        CLIENT      KDC      SERVICE
+        AS-REQ ----> |
+           | <---- AS-REP
+        TGS-REQ----> |
+           | <---- TGS-REP
+        AP-REQ ---------------> |       NOTE: optional PAC validation here
+           | <--------------- AP-REP
+
+kerberos delegation is a feature that allows one principal to request access to resources on behalf of another principal
+three types: unconstrained, constrained, role-based
+
+    unconstrained delegation:
+        enabled by setting a flag called TRUSTED_FOR_DELEGATION on the UAC attribute of the computer object
+            we can check which copmuters have unconstrained using: 
+                beacon> ldapsearch (&(samAccountType=805306369)(userAccountControl:1.2.840.113556.1.4.803:=524288)) --attributes samaccountname
+        this can be abused since any copmuter configured for unconstrained delegation can be used to extract TGTs
+        we can use rubeus' monitor command to capture and display TGTs as user authneticate
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /nowrap
