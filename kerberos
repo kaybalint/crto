@@ -38,3 +38,8 @@ three types: unconstrained, constrained, role-based
         this can be abused since any copmuter configured for unconstrained delegation can be used to extract TGTs
         we can use rubeus' monitor command to capture and display TGTs as user authneticate
             beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /nowrap
+    constrained delegation:
+        Service for User (S4U) extension was created to replace unconstrained
+            Service for User to Proxy (S4U2proxy) allows a service to obtain a specified service ticket on behalf of a different user
+                known as constrained delegation
+            Service for User to Self (S4U2self)
