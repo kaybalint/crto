@@ -39,7 +39,21 @@ three types: unconstrained, constrained, role-based
         we can use rubeus' monitor command to capture and display TGTs as user authneticate
             beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /nowrap
     constrained delegation:
-        Service for User (S4U) extension was created to replace unconstrained
+        Service for User (S4U) extension was created to replace unconstrained by limiting the services to which another service can delegate access
             Service for User to Proxy (S4U2proxy) allows a service to obtain a specified service ticket on behalf of a different user
                 known as constrained delegation
-            Service for User to Self (S4U2self)
+            Service for User to Self (S4U2self) allows a service to obtain a service ticket on behalf of a user when a user authenticated in a way other than kerberos
+                known as protocol transition 
+        configured via the msDS-AllowedToDelegateTo attribute of the copmuter object
+            we can check the list of SPNs that the computer is allowed to delegate to using:
+                beacon> ldapsearch (&(samAccountType=805306369)(msDS-AllowedToDelegateTo=*)) --attributes samAccountName,msDS-AllowedToDelegateTo
+        constrained delegation:
+            used when only kerberos authentication is enabled 
+            the service will send a TGS-REQ to the KDC asking for TGS to the target SPN and include a copy of the user's cached TGS
+            the KDC will verify the msDS-AllowedToDelegateTo attribute contains the target SPN then return the service ticket
+        protocol transition:
+            disabled unless the TRUSTED_TO_AUTH_FOR_DELEGATION flag is explicitly set on the UAC attribute of the computer object
+                we can check this using:
+                    beacon> ldapsearch (&(samAccountType=805306369)(samaccountname=lon-ws-1$)) --attributes userAccountControl
+                    NOTE: any value other than default 4096 should be inspected, decimal value for TRUSTED_TO_AUTH_FOR_DELEGATION is 16777216, so we would do [System.Convert]::ToBoolean(<UAC_value> -band 16777216) in PowerShell
+            the service will send a TGS-REQ containing the user's username and sets the SPN to the copmuter's own samAccountName    
