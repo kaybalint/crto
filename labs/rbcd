@@ -1,0 +1,3 @@
+issue socks command to conduct attack via SOCKS proxy
+    beacon> socks 1080 socks5
+    
