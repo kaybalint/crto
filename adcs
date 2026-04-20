@@ -91,3 +91,8 @@ enumeration using certify
                 beacon> execute-assembly C:\Tools\SharpSystemTriggers\SharpSpoolTrigger\bin\Release\SharpSpoolTrigger.exe 10.10.120.1 10.10.121.108
             once the ntlm req tunnels to ntlmrelayx, it will relay it back through socks proxy to request the cert, download it, and save in PFX format
             this cert can be used to obtain a TGT, then we can perform a S42Uself to obtain service tickets
+
+6. golden certificates
+    technique to extend privileged access to a CA server into unrestricted privileged across the entire domain
+    if a CA server is compromised, we can extract the public and private keys used to sign and issue certs
+    
