@@ -1,0 +1,2 @@
+active directory certificate services (ADCS) is used for issuing and managing PKI certificates
+we can use misconfigurations in ADCS to escalate priviliges and achieve persistence
