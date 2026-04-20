@@ -64,5 +64,7 @@ ticket forgery:
                 /ticketuser is the user we want to impersonate
                 /ticketuserid is the impersonated user's RID
                 /domain is the current domain
-                
+        we can verify this works by running the describe command before and after
+            e.g. PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe describe /servicekey:[krbtgt hash] /ticket:[TGT]
+
 dpapi backup keys
