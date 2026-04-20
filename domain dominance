@@ -1,3 +1,5 @@
+if we have gained domain admin privs, we can now extract highly-sensitive authentication material to maintain persistence
+
 dcsync
 ticket forgery
 dpapi backup keys
