@@ -1,2 +1,13 @@
 active directory certificate services (ADCS) is used for issuing and managing PKI certificates
 we can use misconfigurations in ADCS to escalate priviliges and achieve persistence
+
+enumeration using certify
+    beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-cas --quiet
+    this will return information about CA and sub-CAs in the domain, along with their potential vulnerabilities
+
+ESC1 vulnerability:
+    priv esc vuln that occurs when an attacker can enroll for a cert that has an EKU that enables client authentication
+    and where subject info can be supplied by the requester
+    enumeration for this vuln:
+        beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe enum-templates --filter-enabled --filter-vulnerable --hide-admins --quiet
+            we're looking for the ENROLLEE_SUPPLIES_SUBJECT flag, client auth in the extended key usage
