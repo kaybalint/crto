@@ -3,3 +3,17 @@ types of trusts
     tree-root: two-way transitive trust automatically created when a domain is added to an existing forest
     external: one or two-way non-transitive trust that enables resource sharing b/w different domains in different forests
     forest: one or two-way transitive trust that enables resource sharing b/w forests
+
+transitivity of a trust determines whether the trust relationship extends beyond the two parties with which it was formed
+    e.g. if domain A and domain B have explicit transitive trust
+        and domain B and domain C have explicit transitive trust
+        then domain A and domain C implicitly trust one another
+
+trust direction enables access to resources in either one or both directions
+    e.g.    domain   --direction of trust-->       domain 
+              A      <--direction of acces--         C
+           "trusted"                             "trusting"
+
+information about trust relationships are stored in AD as a trusted domain object (TDO)
+    these can be read by querying the trustedDomain object class
+        e.g. beacon> ldapsearch (objectClass=trustedDomain)
