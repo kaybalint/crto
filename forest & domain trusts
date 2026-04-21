@@ -1,0 +1,5 @@
+types of trusts
+    parent/child: two-way transitive trust automatically created when a new domain is added to existing tree
+    tree-root: two-way transitive trust automatically created when a domain is added to an existing forest
+    external: one or two-way non-transitive trust that enables resource sharing b/w different domains in different forests
+    forest: one or two-way transitive trust that enables resource sharing b/w forests
