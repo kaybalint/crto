@@ -4,7 +4,8 @@ types of trusts
     external: one or two-way non-transitive trust that enables resource sharing b/w different domains in different forests
     forest: one or two-way transitive trust that enables resource sharing b/w forests
 
-NOTE: security boundaries only exist at the forest level, meaning it is not possible 
+NOTE: security boundaries only exist at the forest level, meaning it is not possible to prevent admins in one domain
+      from accesing data in another
 
 transitivity of a trust determines whether the trust relationship extends beyond the two parties with which it was formed
     e.g. if domain A and domain B have explicit transitive trust
