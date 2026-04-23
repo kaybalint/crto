@@ -36,3 +36,11 @@ information about trust relationships are stored in AD as a trusted domain objec
             32 is TRUST_ATTRIBUTE_WITHIN_FOREST
             64 is TRUST_ATTRIBUTE_TREAT_AS_EXTERNAL
 
+inter-realm tickets (aka referral tickets)
+    an inter-realm key is used to allow for principals to request tickets across realms
+        NOTE: all parent/child trusts in a forest have the same key (transitive trust)
+    if a principal wishes to access a service in a trusting realm...
+        it will send a TGS-REQ to its own KDC
+        the KDC will return a TGS-REP containing an inter-realm TGT (encrypted with inter-realm key rather than krbtgt secret)
+        the principal uses that TGT to request access via the KDC of the trusting realm
+    
