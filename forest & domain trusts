@@ -43,4 +43,6 @@ inter-realm tickets (aka referral tickets)
         it will send a TGS-REQ to its own KDC
         the KDC will return a TGS-REP containing an inter-realm TGT (encrypted with inter-realm key rather than krbtgt secret)
         the principal uses that TGT to request access via the KDC of the trusting realm
-    
+    NOTE: once a trust has been created, the TGS of the trusting realm is registered as a principal with the trusted realm's KDC
+          we can query for these trust accounts with...
+            beacon> ldapsearch (samAccountType=805306370) --attributes samAccountName
