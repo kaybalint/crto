@@ -104,3 +104,5 @@ inbound trusts
         verify
             beacon> run klist
             beacon> ls \\par-jmp-1.partner.com\c$
+
+outbound trusts
