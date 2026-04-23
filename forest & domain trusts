@@ -26,3 +26,9 @@ information about trust relationships are stored in AD as a trusted domain objec
             1 is TRUST_DIRECTION_INBOUND
             2 is TRUST_DIRECTION_OUTBOUND
             3 is TRUST_DIRECTION_BIDIRECTIONAL
+        trustAttributes: bitwise flags that define properties on trust where...
+            1 is TRUST_ATTRIBUTE_NON_TRANSITIVE
+            4 is TRUST_ATTRIBUTE_QUARANTINED_DOMAIN
+            8 is TRUST_ATTRIBUTE_FOREST_TRANSITIVE
+            32 is TRUST_ATTRIBUTE_WITHIN_FOREST
+            64 is TRUST_ATTRIBUTE_TREAT_AS_EXTERNAL
