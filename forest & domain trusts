@@ -101,4 +101,6 @@ inbound trusts
                     /service is the target service in the trusting domain
                     /dc is the domain controller in the trusting domain
                     /ticket is the inter-realm TGT
-                    
+        verify
+            beacon> run klist
+            beacon> ls \\par-jmp-1.partner.com\c$
