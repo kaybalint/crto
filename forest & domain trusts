@@ -10,6 +10,7 @@ transitivity of a trust determines whether the trust relationship extends beyond
         then domain A and domain C implicitly trust one another
 
 trust direction enables access to resources in either one or both directions
+    in this example, trust is inbound from domain A and outbound from domain C
     e.g.    domain   --direction of trust-->       domain 
               A      <--direction of acces--         C
            "trusted"                             "trusting"
@@ -17,3 +18,11 @@ trust direction enables access to resources in either one or both directions
 information about trust relationships are stored in AD as a trusted domain object (TDO)
     these can be read by querying the trustedDomain object class
         e.g. beacon> ldapsearch (objectClass=trustedDomain)
+    important attributes include...
+        cn: fqdn of the domain
+        flatName: netBIOS name of the domain
+        trustDirection: direction of trust where...
+            0 is TRUST_DIRECTION_DISABLED
+            1 is TRUST_DIRECTION_INBOUND
+            2 is TRUST_DIRECTION_OUTBOUND
+            3 is TRUST_DIRECTION_BIDIRECTIONAL
