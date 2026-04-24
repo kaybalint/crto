@@ -106,3 +106,9 @@ inbound trusts
             beacon> ls \\par-jmp-1.partner.com\c$
 
 outbound trusts
+    now say an adversary has access to a trusting domain, we are against the direction of access and cannot access resources in the trusted domain
+    verified by querying the TDO, should show we are on the outbound side of a one-way trust with a foreign domain
+    further verified by attempting to enumerate the foreign domain, should result in error code 49 (invalid credentials)
+        beacon> ldapsearch (objectClass=domain) --dn DC=contoso,DC=com --attributes name,objectSid --hostname [foreign domain]
+            NOTE: this fails b/c the TGS-REQ for krbtgt/CONTOSO.COM is hitting the partner.com KDC
+    however, we can access resources in the trusted domain if we have credentials for a principal in the trusted domain
