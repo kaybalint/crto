@@ -1,0 +1,19 @@
+never navigate away from the "Lab Launch" page! if need to reference course material, open another tab or window
+
+instruction panel will detail the operational objective and will clarify any off-limit hosts
+    NOTE: you will fail the exam if you generate an alert on an off-limit host, even if you achieve the operational objective
+
+minimum score to pass: 85 points
+achieving the operational objective: 50 points
+OPSEC discipline: 50 points
+    AVOID THE FOLLOWING:
+        Blocked code execution by security controls like Defender and AppLocker.
+        Outbound network connections from unusual processes.
+        Default Cobalt Strike indicators including named pipe names and process injection techniques.
+        Suspicious lateral movement indicators.
+        Suspicious handles to LSASS.
+        Disabling security controls like Defender and the Windows firewall.
+    
+the exam lab can be run for 24 hours, for extended breaks, Exit Lab & Save Progress (will save for 7 days)
+
+7-day cool down after a failure before retake

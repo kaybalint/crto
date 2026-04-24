@@ -1,0 +1,17 @@
+cobalt strike can generate these reports based on recorded activity
+    activity report: overall timeline of post-exploitation activity
+    hosts report: summarizes info found on each host (e.g. creds, services, etc.)
+    IOC report: includes analysis of C2's traffic profile, domains, file hashes
+    sessions report: summarizes post-exploitation activity by session
+    social engineering report: activity from the built-in spear phishing capabilities
+    TTP report: maps activity with MITRE ATT&CK
+
+these can be generated from the 'Reporting' menu
+
+typical red team report structure
+    executive summary
+    goals & scenario
+    attack narative
+    observations & recommendations
+    conclusion
+
