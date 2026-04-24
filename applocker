@@ -4,6 +4,23 @@ each policy contains one or more enforcement rules, and each rule contains a per
     conditions define the rule itself, can be based on published, path, and/or file hash
 these policies are defined by system admins and deployed via GPOs or Intune
 
+enumeration of policies
+    via registry
+        useful when we already have console access to a protected machine
+            PS C:\Users\pchilds> Get-ChildItem 'HKLM:Software\Policies\Microsoft\Windows\SrpV2'
+            PS C:\Users\pchilds> Get-ChildItem 'HKLM:Software\Policies\Microsoft\Windows\SrpV2\Exe'
+    native applocker cmdlet
+        PS C:\Users\pchilds> $policy = Get-AppLockerPolicy -Effective
+        PS C:\Users\pchilds> $policy.RuleCollections
+    via GPOs
+        useful when we have a beacon running on an unprotected machine, and trying to move laterally to protected machine
+        we can walk through each container in SYSVOL and look for Registry.pol in the Machine dir
+             beacon> ldapsearch (objectClass=groupPolicyContainer) --attributes displayName,gPCFileSysPath
+                --------------------
+                displayName: AppLocker
+                gPCFileSysPath: \\contoso.com\SysVol\contoso.com\Policies\{8ECEE926-7FEE-48CD-9F51-493EB5AD95DC}
+                --------------------
+            beacon> ls \\contoso.com\SysVol\contoso.com\Policies\{8ECEE926-7FEE-48CD-9F51-493EB5AD95DC}\Machine
 
 
 *********************
