@@ -1,0 +1,8 @@
+create new windows executable (stageless)
+    tcp listener, DLL output
+then host on cobalt
+    Site management > Host file
+    file accessible on:
+        http://172.16.0.10:80/download/file.ext
+pull onto pchild desktop
+    
