@@ -1,0 +1,29 @@
+AppLocker is an application control technology built into Windows to prevent users from running applications not approved by policy
+each policy contains one or more enforcement rules, and each rule contains a permission and a condition
+    permissions define the action (allow or deny) and the user/group to which the rule applies
+    conditions define the rule itself, can be based on published, path, and/or file hash
+these policies are defined by system admins and deployed via GPOs or Intune
+
+
+
+*********************
+
+default applocker policies:
+
+Executable Rules: These rules are for executable files such as .exe and .com.
+    Allow | Everyone | Path | %PROGRAMFILES%\*
+    Allow | Everyone | Path | %WINDIR%\*
+    Allow | BUILTIN\Administrators | Path | *
+
+Windows Installer Rules: These rules are for installer files such as .msi, .msp, and .mst.
+    Allow | Everyone | Publisher | *
+    Allow | Everyone | Path | %WINDIR%\Installer\*
+    Allow | BUILTIN\Administrators | Path | *.*
+
+Script Rules: These are script files such as .ps1, .bat, .cmd, .vbs, and .js.
+    Allow | Everyone | Path | %PROGRAMFILES%\*
+    Allow | Everyone | Path | %WINDIR%\*
+    Allow | BUILTIN\Administrators | Path | *
+
+Packaged App Rules: These are for .appx packaged applications.
+    Allow | Everyone | Publisher | *
