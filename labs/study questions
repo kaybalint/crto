@@ -99,9 +99,15 @@ CRTO scenario example
                 Add-DomainObjectAcl -TargetIdentity Helpdesk_Group -PrincipalIdentity backup_admin -Rights All
             now we add ourselves
                 Add-DomainGroupMember -Identity Helpdesk_Group -Members backup_admin
-            once we are successfully members of Helpdesk_Group, we may be able to:
-                Access certain servers (often helpdesk tools / RDP boxes)
-                Reset passwords for users (very common)
-                Access user management tools
-                Sometimes delegated AD rights
-                
+                once we are successfully members of Helpdesk_Group, we may be able to:
+                    Access certain servers (often helpdesk tools / RDP boxes)
+                    Reset passwords for users (very common)
+                    Access user management tools
+                    Sometimes delegated AD rights
+                    so we should re-enumerate what the group can access
+                        using bloodhound/powerview we can search what machines we can access, if we have rdp access, if we have AD delegation, etc.
+                        we are looking for AD users & computers, password reset privs, remote management servers, etc.
+            let's focus on password resetting
+                ❓ “Whose passwords can I reset that leads to Domain Admin?”
+                    we are searching for service accounts, privileged non-DA accounts, as admins directly may be more closely protected/monitored
+                we enumerate service accounts and find svc_sql, svc_backup, svc_web
