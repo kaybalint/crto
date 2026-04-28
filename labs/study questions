@@ -111,3 +111,11 @@ CRTO scenario example
                 ❓ “Whose passwords can I reset that leads to Domain Admin?”
                     we are searching for service accounts, privileged non-DA accounts, as admins directly may be more closely protected/monitored
                 we enumerate service accounts and find svc_sql, svc_backup, svc_web
+            oh! we already have access to svc_sql let's explore that for a little
+        we find that svc_sql runs on SQL01
+        let's move laterally to SQL01
+        now let's check for logon sessions, dump creds
+        now we find a domain admin session active! lets steal the token
+            beacon> steal_token <pid>
+    
+    now with our domain admin access, lets dump ntds.dit
