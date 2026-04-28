@@ -94,7 +94,7 @@ CRTO scenario example
                     sekurlsa::tickets
         no credentials found, lets pivot to AD analysis
             lets analyze using LDAP queries and visualize using BOFHound
-        say we find backup_admin -> WriteDACL -> Helpdesk Group -> GenericalAll -> DC01
+        say we find backup_admin -> WriteDACL -> Helpdesk Group -> GenericAll -> DC01
             we can modify the ACL to gain control
                 Add-DomainObjectAcl -TargetIdentity Helpdesk_Group -PrincipalIdentity backup_admin -Rights All
             now we add ourselves
