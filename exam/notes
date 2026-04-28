@@ -45,4 +45,4 @@ DUBLIN\Domain Users                               Group                    S-1-5
 Everyone                                          Well-known group         S-1-1-0                                       Mandatory group, Enabled by default, Enabled group, 
 BUILTIN\Administrators                            Alias                    S-1-5-32-544                                  
 
-so we're in the administrators group?? 
+so we're in the administrators group?? lets try to start new seesion as admin?
