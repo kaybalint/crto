@@ -19,3 +19,10 @@ RESTRICTIONS
 ACCESS
     can log into both the Attacker Desktop and Foothold Machine with the password Passw0rd!
     we have access to the user account dublin\consultant
+
+*************
+
+okay lets try to get our initial connection, powershell one-liner?
+    generate a PS one liner via CS
+        windows stageless > HTTP > PS
+    run Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
