@@ -45,6 +45,15 @@ Q9 Why are Group Managed Service Account (gMSA) valuable for attackers?
 
     gMSA accounts are valuable because their credentials can be retrieved from authorized hosts and they are often used across multiple systems with elevated privileges, enabling lateral movement and privilege escalation
 
+Q10 If we see gMSA usage on a server, what do we do?
+
+    extract its credentials from the host and use it to authenticate to other systems or services where it has access
+
+Q11 If we see a domain admin session but we are not local admin, how do we proceed?
+
+    without local admin we cannot dump lsass, steal tokens or access other users' processes so we are blocked
+    we need to focus on priv esc and then return once we have local admin
+
 
 NOTE:
     Whenever you land on a host:
