@@ -44,9 +44,15 @@ Q8 Why does kerberoasting work? What is the core weakness?
 Q9 Why are Group Managed Service Account (gMSA) valuable for attackers?
 
     gMSA accounts are valuable because their credentials can be retrieved from authorized hosts and they are often used across multiple systems with elevated privileges, enabling lateral movement and privilege escalation
+    best way to determine if gMSA is present is if services have a $ at the end (e.g. sqlsvc$)
 
 Q10 If we see gMSA usage on a server, what do we do?
 
+    1. Look for accounts ending in $
+    2. Check services / tasks / IIS
+    3. Confirm retrieval rights 
+    4. Extract credentials
+    5. Pivot
     extract its credentials from the host and use it to authenticate to other systems or services where it has access
 
 Q11 If we see a domain admin session but we are not local admin, how do we proceed?
