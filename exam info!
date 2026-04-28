@@ -7,12 +7,12 @@ minimum score to pass: 85 points
 achieving the operational objective: 50 points
 OPSEC discipline: 50 points
     AVOID THE FOLLOWING:
-        Blocked code execution by security controls like Defender and AppLocker.
-        Outbound network connections from unusual processes.
-        Default Cobalt Strike indicators including named pipe names and process injection techniques.
-        Suspicious lateral movement indicators.
-        Suspicious handles to LSASS.
-        Disabling security controls like Defender and the Windows firewall.
+        blocked code execution by security controls like Defender and AppLocker.
+        outbound network connections from unusual processes.
+        default Cobalt Strike indicators including named pipe names and process injection techniques.
+        suspicious lateral movement indicators.
+        suspicious handles to LSASS.
+        disabling security controls like Defender and the Windows firewall.
     
 the exam lab can be run for 24 hours, for extended breaks, Exit Lab & Save Progress (will save for 7 days)
 
