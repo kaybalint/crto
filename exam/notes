@@ -26,3 +26,23 @@ okay lets try to get our initial connection!
 what worked:
     a http dll payload downloaded with www.bleepincomputer.com and then ran with rundll
     but the connection is not stable of course
+    okay follow steps in applocker bypass PowerShell CLM
+
+stable connection! time for enumeration
+
+[04/28 20:59:02] [*] Running whoami (T1033)
+[04/28 20:59:07] [+] host called home, sent: 7061 bytes
+[04/28 20:59:07] [+] received output:
+
+UserName		SID
+====================== ====================================
+DUBLIN\consultant	S-1-5-21-2958544638-1589230383-838459903-3104
+
+
+GROUP INFORMATION                                 Type                     SID                                          Attributes               
+================================================= ===================== ============================================= ==================================================
+DUBLIN\Domain Users                               Group                    S-1-5-21-2958544638-1589230383-838459903-513  Mandatory group, Enabled by default, Enabled group, 
+Everyone                                          Well-known group         S-1-1-0                                       Mandatory group, Enabled by default, Enabled group, 
+BUILTIN\Administrators                            Alias                    S-1-5-32-544                                  
+
+so we're in the administrators group?? 
