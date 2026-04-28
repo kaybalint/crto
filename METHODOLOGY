@@ -1,165 +1,130 @@
-Always run:
+always ask
+    do I have creds?
+    do I control something?
+    can I reach a better machine?
+    is a DA session available?
 
-whoami /all
-ps
-getuid
-If LOCAL ADMIN:
-Dump creds (Mimikatz / logonpasswords)
-Check tokens (steal_token)
-Check sessions (who’s logged in)
+one-Line mental model
+    Creds → ACL → Service Account → Server → DA Session → Token → DA
+    User → ACL → group → service account → server → DA session → token
+    
+always run:
+    whoami /all
+    ps
+    getuid
+    
+    If LOCAL ADMIN:
+        dump creds (Mimikatz / logonpasswords)
+        check tokens (steal_token)
+        check sessions (who’s logged in)
+    NOTE: Local admin = credential access opportunity
 
-👉 Rule:
+enumeration priorities:
+    credentials (fastest win)
+    sessions (DA logged in?)
+    ACL paths (bloodhound mindset)
+    kerberos attack surface
+    
+ACL Abuse (IMPORTANT)
+    GenericWrite
+        Reset password
+        Add SPN → Kerberoast
+        Modify attributes
+    WriteDACL
+        Grant yourself GenericAll
+        Then take over object
+    GenericAll
+        Full control → instant takeover
 
-Local admin = credential access opportunity
+group abuse
+    control group → add yourself
+    have WriteDACL → modify ACL → then add yourself
 
-🔍 Enumeration Priorities (in order)
-Credentials (fastest win)
-Sessions (DA logged in?)
-ACL paths (BloodHound mindset)
-Kerberos attack surface
-🔐 Kerberos Attacks
-Kerberoasting
+service accounts (svc_*)
+    target when:
+        SPNs exist
+        they run services
+        they have privileges
+    pattern:
+        Service account → server → creds → DA
 
-Using Rubeus:
+on a server
+    dump creds (Mimikatz)
+    check sessions
+    look for DA
+    steal token
+        token theft
+            ps
+            steal_token <pid>
+            getuid
 
-Target: users with SPNs
-Weakness: TGS encrypted with service account hash
-AS-REP Roasting
-Condition: pre-auth disabled
-Result: crackable AS-REP
-Pass-the-Ticket (PtT)
-Inject ticket → act as user
-No password needed
-🔐 ACL Abuse (CORE SKILL)
-GenericWrite
-Reset password
-Add SPN → Kerberoast
-Modify attributes
-WriteDACL
-Grant yourself GenericAll
-Then take over object
-GenericAll
-Full control → instant takeover
-👥 Group Abuse
-Control group → add yourself
-Have WriteDACL → modify ACL → then add yourself
-🧠 Service Accounts (svc_*)
+ADCS (if present)
+    if template has:
+        client auth
+        Low-priv enrollment
+        “Supply in request”
+    request cert as DA → authenticate → full compromise
 
-Target when:
-
-SPNs exist
-They run services
-They have privileges
-
-👉 Pattern:
-
-Service account → server → creds → DA
-
-🖥️ On a Server
-Dump creds (Mimikatz)
-Check sessions
-Look for DA
-Steal token
-
-🎯 Token Theft
-ps
-steal_token <pid>
-getuid
-
-👉 Fastest win if DA session exists
-
-🧪 ADCS (If present)
-
-If template has:
-
-Client Auth
-Low-priv enrollment
-“Supply in request”
-
-👉 You can:
-
-Request cert as DA → authenticate → full compromise
-
-🧠 gMSA
-Extract password from host
-Use for lateral movement
-Often high privilege
-⚠️ Golden Rules
-Don’t attack blindly
-Follow attack paths, not tools
-Credentials > enumeration
-Deterministic > probabilistic
+gMSA
+    extract password from host
+    use for lateral movement
+    often high privilege
 
 -------DECISION TREE--------
 
-🟢 1. Foothold
+1. foothold
+    local admin?
+        YES:
+            dump creds (Mimikatz)
+            check sessions
+            check tokens
+            👉 DA session found?
+                → steal token → DONE
+        NO:
+            enumerate AD
 
-👉 Local admin?
+2. do i have credentials?
+    YES:
+        re-enumerate as that user
+    NO:
+        Try:
+            Kerberoast (Rubeus)
+            AS-REP roast
+        Look for creds
 
-YES:
-Dump creds (Mimikatz)
-Check sessions
-Check tokens
+3. any ACL paths?
+    YES:
+        GenericWrite → take over
+        WriteDACL → give yourself control → take over
+        GenericAll → immediate control
+    NO:
+        keep enumerating / pivot
 
-👉 DA session found?
-→ steal token → DONE
+4. got a service account?
+    YES:
+        find where it runs
+        go to that server
+    NO:
+        keep hunting creds / ACLs
 
-NO:
-Enumerate AD
-🟡 2. Do I have credentials?
-YES:
-Re-enumerate as that user
-Check:
-Groups
-ACLs
-Access
-NO:
-Try:
-Kerberoast (Rubeus)
-AS-REP roast
-Look for creds
-🔵 3. Any ACL paths?
-YES:
-Abuse them:
-GenericWrite → take over
-WriteDACL → give yourself control → take over
-GenericAll → immediate control
-NO:
-Keep enumerating / pivot
-🟣 4. Got a service account?
-YES:
-Find where it runs
-Go to that server
-NO:
-Keep hunting creds / ACLs
-🔴 5. On a server?
-YES:
-Dump creds (Mimikatz)
-Check sessions
+5. on a server?
+    YES:
+        dump creds (Mimikatz)
+        check sessions
+        👉 DA present?
+            → steal token → DONE
+    NO:
+        move to a better host
 
-👉 DA present?
-→ steal token → DONE
+6. have delegation?
+    YES:
+        reset passwords of:
+            service accounts
+            IT users
+            → pivot again
 
-NO:
-Move to a better host
-🟠 6. Have delegation (Helpdesk)?
-YES:
-Reset passwords of:
-service accounts
-IT users
-
-→ pivot again
-
-⚫ 7. ADCS?
-YES:
-Find vulnerable template
-→ request cert as DA
-→ DONE
-🧠 Always Ask Yourself
-Do I have creds?
-Do I control something?
-Can I reach a better machine?
-Is a DA session available?
-
-🔥 One-Line Mental Model
-Creds → ACL → Service Account → Server → DA Session → Token → DA
+7. ADCS?
+    YES:
+        find vulnerable template
+        → request cert as DA
+        → DONE
