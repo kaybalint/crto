@@ -18,11 +18,11 @@ RESTRICTIONS
 
 ACCESS
     can log into both the Attacker Desktop and Foothold Machine with the password Passw0rd!
-    we have access to the user account dublin\consultant
+    we have access to the user account dublin\consultant on DUB-WKSTN-2
 
 *************
 
-okay lets try to get our initial connection, powershell one-liner?
-    generate a PS one liner via CS
-        windows stageless > HTTP > PS
-    run Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+okay lets try to get our initial connection!
+what worked:
+    a http dll payload downloaded with www.bleepincomputer.com and then ran with rundll
+    
