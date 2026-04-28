@@ -28,7 +28,19 @@ Q5 You have a user account with SeImpersonatePrivilege on a machine.
     What’s the typical end result? SYSTEM, which gives us cred dumping power to get DA
 
 Q6 You run BloodHound and see: User → WriteDACL → Group → Domain Admins
+    
     What’s your move? we control the ACL of the group, so we can grant ourselves full control / generic all over the group then add ourselves
+
+Q7 What does it mean if a user is a protected user or adminsdholder?
+    
+    AdminSDHolder: applies protected ACL template every hour, disables inheritance on protected objects
+    Protected Users: no ntlm, no cred caching, no delegation
+
+Q8 Why does kerberoasting work? What is the core weakness?
+
+    the service ticket is encrypted with the service account's password hash, which is often weak
+    so we request a ticket, get encrypted data, crack it offline 
+
 
 NOTE:
     Whenever you land on a host:
