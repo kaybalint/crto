@@ -1,0 +1,21 @@
+OBJECTIVE
+ simulate an advanced threat and gain access to a secure storage server - enc-fs-1.contoso.enclave.
+ prove access by writing a text file to its hard disk at the location C:\rto.txt. the content does not matter.
+
+AUTHORIZES HOSTS
+    10.10.122.0/23 (dublin.contoso.com)
+    10.10.120.0/24 (contoso.com)
+    10.10.124.0/24 (contoso.enclave)
+
+RESTRICTED HOSTS
+    10.10.x.254
+    10.10.124.1 (enc-dc-1.contoso.enclave)
+    10.10.124.200 (elk.contoso.enclave)
+
+RESTRICTIONS
+    changing account passwords
+    disabling host-based defences, including anti-virus and firewalls
+
+ACCESS
+    can log into both the Attacker Desktop and Foothold Machine with the password Passw0rd!
+    we have access to the user account dublin\consultant
