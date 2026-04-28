@@ -7,7 +7,19 @@ always ask
 one-Line mental model
     Creds → ACL → Service Account → Server → DA Session → Token → DA
     User → ACL → group → service account → server → DA session → token
-    
+
+any time i land on a host:
+    who am i?
+    what privileges do i have?
+    who is logged in?
+    what credentials exist?
+    what services run here?
+
+    if DA is present:
+        immediately think “token theft / credential extraction”
+
+----------
+
 always run:
     whoami /all
     ps
