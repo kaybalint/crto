@@ -41,6 +41,10 @@ Q8 Why does kerberoasting work? What is the core weakness?
     the service ticket is encrypted with the service account's password hash, which is often weak
     so we request a ticket, get encrypted data, crack it offline 
 
+Q9 Why are Group Managed Service Account (gMSA) valuable for attackers?
+
+    gMSA accounts are valuable because their credentials can be retrieved from authorized hosts and they are often used across multiple systems with elevated privileges, enabling lateral movement and privilege escalation
+
 
 NOTE:
     Whenever you land on a host:
