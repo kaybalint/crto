@@ -22,6 +22,14 @@ ACCESS
 
 *************
 
+user info:
+
+etate  is in workstation admins
+tdobson is in web admins
+nwallace is a domain admin!
+
+*************
+
 okay lets try to get our initial connection!
 what worked:
     a http dll payload downloaded with www.bleepincomputer.com and then ran with rundll
@@ -86,3 +94,13 @@ lets go back to basics, restarting credential enumeration
 okay so i stole the token from etate's cmd.exe process then ran
 [04/29 15:44:26] beacon> jump scshell64 dub-wkstn-1 smb
 and we got SYSTEM on dub-wkstn-1 woop!
+
+**********
+
+enumerating dub-wkstn-1
+
+okay now i stole the token from tdobson's svchost and then ran
+[04/29 16:24:43] beacon> jump scshell64 dub-web-1 smb
+and we got SYSTEM on dub-web-1!
+
+***********

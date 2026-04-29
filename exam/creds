@@ -16,3 +16,17 @@
     User      : DUBLIN\etate
     MsCacheV2 : 50d64c01ccabf978fb530a58af0dca98
 
+
+Session           : Interactive from 1
+User Name         : tdobson
+Domain            : DUBLIN
+Logon Server      : DUB-DC-1
+Logon Time        : 28/04/2026 15:42:12
+SID               : S-1-5-21-2958544638-1589230383-838459903-3102
+	msv :	
+	 [00000003] Primary
+	 * Username : tdobson
+	 * Domain   : DUBLIN
+	 * NTLM     : 4a0f9bc164edc4aab545196cce6d7c9d
+	 * SHA1     : 27e227423cad68e99a36abecabf1a7acebd7fa91
+	 * DPAPI    : 5680fc1051d04d4055279e2b729e9be9
