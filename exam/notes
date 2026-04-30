@@ -205,3 +205,6 @@ okay so mssqlsvc was able to get cifs tickets so lets make that account sysadmin
  |--> User is a member of the sysadmin role
 
  bet lets try this again
+ CLR DLL worked! wecaught the shell then ran sweet potato w tcp exe and got system
+ logon passwords revealed the ntlm for nwallace!
+ nwallace:eb06f0f9e93c9acb12a50fdfeedefc18
