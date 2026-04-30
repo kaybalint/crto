@@ -33,3 +33,15 @@ SID               : S-1-5-21-2958544638-1589230383-838459903-3102
 
 Secret  : DefaultPassword
 cur/text: hfu2A!P!NEnyHeQ*
+
+Domain            : DUBLIN
+Logon Server      : DUB-DC-1
+Logon Time        : 28/04/2026 15:43:00
+SID               : S-1-5-21-2958544638-1589230383-838459903-4102
+	msv :	
+	 [00000003] Primary
+	 * Username : nwallace
+	 * Domain   : DUBLIN
+	 * NTLM     : eb06f0f9e93c9acb12a50fdfeedefc18
+	 * SHA1     : e9a4c24f542eb659a62d1ee7f8777b67db74ade4
+	 * DPAPI    : af6bcec89072475c8e6ed2b33dfaa5b1
