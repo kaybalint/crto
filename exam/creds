@@ -62,3 +62,14 @@ DCSYNC
 1603	mssqlsvc	fc525c9683e8fe067095ba2ddc971889	66048
 500	Administrator	115b9dff1550a13bb30232373a7e4d3b	66048
 4101	iappleton	3515a63eaac013cd1238f53950eb6fbc	66048
+
+ENCLAVE
+
+ [00000003] Primary
+	 * Username : ENC-JMP-1$
+	 * Domain   : ENCLAVE
+	 * NTLM     : 18f843f01ad298f3f04c95624dac710a
+
+RID  : 000001f4 (500)
+User : Administrator
+  Hash NTLM: 0dde0e62341ba59c5520fab03d0d06bd
