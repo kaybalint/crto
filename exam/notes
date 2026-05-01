@@ -273,3 +273,6 @@ User : Administrator
   AES? 944d3480bfaff5b385ff3422fac8fd13a3caab0f0f7ed241b0e5c8970a3c844a
 
 bloodhound seems to think that being the admin group gives us writeDACL over domain admins?
+
+tomorrow!!
+beacon> powershell-import C:\Tools\PowerSploit\Recon\PowerView.ps1
