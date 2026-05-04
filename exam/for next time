@@ -1,2 +1,33 @@
 be sure to include persistence !!!!
+rename the smb pipe name!
 read up on trusted domains and how to read files via trusted users
+
+Operational Objective
+You failed to achieve the operational objective.
+Score: 0
+AppLocker
+AppLocker prevented multiple executables from running. Make sure you enumerate the rules before trying to run any scripts or binaries.
+Score: 5
+Network Egress
+No suspicious network egress traffic was detected.
+Score: 5
+Real-time Protection
+Defender's real-time protection was not disabled.
+Score: 0
+Malware
+Defender detected malware multiple times. Ensure Beacon is resilient against static detection via Malleable C2, the Artifact Kit, and Resource Kit. Post-ex OPSEC, such as the spawnto, ppid, etc, are the hardest bits to get right.
+Score: 0
+Named Pipe Names
+Multiple malicious named pipes were detected. Remember to change your post-ex pipename in Malleable C2.
+Score: 0
+Kerberoasting
+A Kerberoasting attack was detected against a decoy account.
+Score: 0
+Suspicious Service Creations
+Multiple suspicious services were created, indicating the use of PsExec. Consider ScShell instead or another lateral movement technique that doesn't rely on services.
+Score: 0
+Process Injection
+The use of CreateRemoteThread was detected multiple times. This can be changed in the process-inject block of Malleable C2.
+Score: 0
+LSASS Access
+Multiple suspicious handles to LSASS were detected. Consider the use of other impersonation techniques instead.
