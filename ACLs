@@ -10,3 +10,5 @@ dsacls.exe can display and change ACEs / permissions in DACLs
       dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro"
     ex call to specify what we have permissions on
       dsacls.exe "cn=Rita,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro" -Context 0,1
+
+enumeration!
