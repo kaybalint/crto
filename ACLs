@@ -11,4 +11,18 @@ dsacls.exe can display and change ACEs / permissions in DACLs
     ex call to specify what we have permissions on
       dsacls.exe "cn=Rita,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro" -Context 0,1
 
+abuse DACLs  
+  GenericAll - full control
+  GenericWrite - full write permissions
+  WriteDacl - allows for modification of the object's DACL
+  WriteOwner - allows us to take ownership of the object
+
 enumeration!
+  PS> Get-DomainObjectAcl
+  PS> Add-DomainObjectAcl
+  PS> Get-Acl
+  PS> Set-Acl
+  on linux, we can use impacket's dacledit.py
+
+resources:
+https://www.thehacker.recipes/ad/movement/dacl#abuse
