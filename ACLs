@@ -1,0 +1,10 @@
+windows in particular uses discretionary access control lists (DACLs) 
+  this means that access is granted based on the user's identity 
+access control entries (ACEs) detail the access rights over specific objects 
+  e.g. Full Control, Change Password, etc.
+
+dsacls.exe can display and change ACEs / permissions in DACLs
+    ex call listing DACLs of user yolanda
+      PS C:\Users\Administrator> dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local"
+    ex call limiting results to show the permissions pedro has over yolando
+      PS C:\Users\Administrator> dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro"
