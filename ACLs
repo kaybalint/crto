@@ -5,6 +5,8 @@ access control entries (ACEs) detail the access rights over specific objects
 
 dsacls.exe can display and change ACEs / permissions in DACLs
     ex call listing DACLs of user yolanda
-      PS C:\Users\Administrator> dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local"
+      dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local"
     ex call limiting results to show the permissions pedro has over yolando
-      PS C:\Users\Administrator> dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro"
+      dsacls.exe "cn=Yolanda,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro"
+    ex call to specify what we have permissions on
+      dsacls.exe "cn=Rita,cn=users,dc=inlanefreight,dc=local" | Select-String "Pedro" -Context 0,1
