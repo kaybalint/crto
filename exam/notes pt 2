@@ -2,3 +2,6 @@ okay first thing i did was switch up the C2 profiles following the methodology i
 keep modifying until i can run an exe without having defender flag it! i ended up changing all variables 'x' to 'kri'
 
 now log in as Admin using Passw0rd! and download the exe from www.bleepincomputer.com/update.exe
+place into Program Files then run!
+
+now we have our connect as SYSTEM on DUB-WKSTN-2
